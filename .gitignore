@@ -1,0 +1,5 @@
+_glue/vendor/*
+_glue/credentials/*
+_glue-site/vendor/*
+_glue-site/credentials/*
+!_glue-site/credentials/sample.yaml
