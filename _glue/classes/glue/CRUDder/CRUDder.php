@@ -17,16 +17,18 @@
   * with this program; if not, write to the Free Software Foundation, Inc.,
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-namespace CRUDder;
+namespace glue\CRUDder;
+use \Symfony\Component\Yaml\Yaml;
+
 abstract class CRUDder {
   // These should be configured per-object
+  protected static $TABLE = null;
   protected static $KEY = null;
   protected static $FIELDS = array();
 
   // These are where state lives
   protected $DATA = array();
-  protected $CHANGED = array();
-  protected $ISNEW = false;
+  protected $CHANGES = array();
 
   // These are the config options used by objects
   protected static $CONFIG = array();
@@ -35,6 +37,11 @@ abstract class CRUDder {
 
   // Need this to pass failures by reference
   const FALSEVAL = FALSE;
+
+  //TODO: PDO transactions -- will need to be static and should work on the
+  //entire class of objects. This may require altering CRUDder\DB to make it
+  //store connections per-class instead of per-DSN. It's a slight performance
+  //hit, but will allow much more intuitive and encapsulated transactions.
 
   /**
    * Create a new row in the table and return an object representing it
@@ -59,16 +66,153 @@ abstract class CRUDder {
         $values[] = $conn->quote($class::prepValuePreQuery($fieldName,$fields[$fieldName]));
       }
     }
+    //build query as a string
     $query = 'INSERT INTO ' . $class::$TABLE . PHP_EOL;
     $query .= '       (' . implode(', ',$cols) . ')' . PHP_EOL;
     $query .= 'VALUES (' . implode(', ',$values) . ')';
     $statement = $conn->prepare($query);
-    $statement->execute();
+    $result = $statement->execute();
     $key = $conn->lastInsertId();
     return $class::read($key);
   }
 
-  public static function prepValuePreQuery($key,$value) {
+  /**
+   * Default factory returns a single item by searching on the key
+   * @param  [type] $keyVal [description]
+   * @return [type]         [description]
+   */
+  public static function read($keyVal) {
+    $class = get_called_class();
+    $result = $class::query(array(
+      'sort' => false,
+      'where' => '@@' . $class::$KEY . '@@ = :' . $class::$KEY,
+      'limit' => 1
+    ),
+    array(
+      $class::$KEY => $keyVal
+    ));
+    if (count($result) == 0) {
+      return false;
+    }else {
+      return $result[0];
+    }
+  }
+
+  /**
+   * Save the current object's state into the database
+   * @return boolean success or failure
+   */
+  public function update() {
+    $class = get_called_class();
+    $updates = array();
+    $values = array(
+      $class::$KEY => $this->getKey()
+    );
+    $conn = $class::getConnection();
+    foreach ($this->CHANGES as $fieldName => $c) {
+      $fieldInfo = $class::$FIELDS[$fieldName];
+      if ($fieldName != $class::$KEY) {
+        $updates[] = '@@' . $fieldName . '@@ = :' . $fieldName;
+        $values[$fieldName] = $class::prepValuePreQuery($fieldName,$this->__get($fieldName));
+      }
+    }
+    //build query as a string
+    $query = 'UPDATE ' . $class::$TABLE . PHP_EOL;
+    $query .= 'SET ' . implode(', ',$updates) . PHP_EOL;
+    $query .= 'WHERE @@' . $class::$KEY . '@@ = :' . $class::$KEY . PHP_EOL;
+    $query .= 'LIMIT 1';
+    //Fix column names
+    $query = $class::queryColNameFormatter($query);
+    //Execute query
+    $statement = $conn->prepare($query);
+    $result = $statement->execute($values);
+    if ($result) {
+      $this->CHANGES = array();
+    }
+    return $result;
+  }
+
+  //TODO: delete function
+
+  /**
+   * configure a CRUDder class from a YAML configuration string. Can set TABLE,
+   * KEY, SORT and FIELDS
+   * @param  string $yaml YAML string
+   * @return void
+   */
+  public static function configFromYAML($yaml) {
+    $data = Yaml::parse($yaml);
+    $class = get_called_class();
+    $class::$TABLE = $data['TABLE'];
+    $class::$KEY = $data['KEY'];
+    $class::$SORT = $data['SORT'];
+    $class::$FIELDS = $data['FIELDS'];
+  }
+
+  /**
+   * Run a more complex query on this table
+   * @param  [type] $options [description]
+   * @return [type]          [description]
+   */
+  public static function query($options,$values=array()) {
+    $class = get_called_class();
+    $defaults = array(
+      'where'=>false,
+      'sort'=>$class::$SORT,
+      'limit'=>0,
+      'offset'=>0,
+    );
+    $options = array_replace_recursive($defaults,$options);
+    //build query as a string
+    //SELECT FROM statement
+      $query = 'SELECT ';
+      $cols = array();
+      foreach ($class::$FIELDS as $fieldName => $fieldInfo) {
+        $cols[] = $fieldInfo['col'];
+      }
+      $query .= implode(', ', $cols) . PHP_EOL;
+      $query .= 'FROM ' . $class::$TABLE . PHP_EOL;
+    //WHERE statement
+    if ($options['where']) {
+      $query .= 'WHERE' . PHP_EOL;
+      $query .= $options['where'] . PHP_EOL;
+    }
+    //ORDER BY statement
+    if ($options['sort']) {
+      $query .= 'ORDER BY' . PHP_EOL;
+      $query .= $options['sort'] . PHP_EOL;
+    }
+    //LIMIT/OFFSET statement
+    if ($options['limit']) {
+      $query .= 'LIMIT ' . $options['limit'] .PHP_EOL;
+    }
+    if ($options['offset']) {
+      $query .= 'OFFSET ' . $options['offset'] .PHP_EOL;
+    }
+    //Fix column names
+    $query = $class::queryColNameFormatter($query);
+    //Retrieve result
+    $conn = $class::getConnection();
+    $statement = $conn->prepare($query);
+    if ($statement->execute($values) === false) {
+      return false;
+    }
+    $results = $statement->fetchAll();
+    $objects = array();
+    foreach ($results as $row) {
+      $objects[] = new $class($row);
+    }
+    return $objects;
+  }
+
+  /**
+   * Preps a value for use in a query -- needs the value's type from this
+   * object's config so that it knows what it's supposed to look like to SQL
+   * @param  string $key   the name of the field
+   * @param  mixed  $value the value to return a SQL representation of
+   * @return string
+   */
+  protected static function prepValuePreQuery($key,$value) {
     $class = get_called_class();
     $type = $class::$FIELDS[$key]['type'];
     if (is_a($value,'\CRUDder\CRUDder')) {
@@ -117,112 +261,12 @@ abstract class CRUDder {
   }
 
   /**
-   * Default factory returns a single item by searching on the key
-   * @param  [type] $keyVal [description]
-   * @return [type]         [description]
+   * runs on values returned from the database to make them into appropriate
+   * PHP objects based on their type specified in object's config
+   * @param  string $key
+   * @param  string $value
+   * @return mixed
    */
-  public static function read($keyVal) {
-    $class = get_called_class();
-    $result = $class::query(array(
-      'sort' => $class::$SORT,
-      'where' => '@' . $class::$KEY . '@ = :' . $class::$KEY,
-      'limit' => 1
-    ),
-    array(
-      $class::$KEY => $keyVal
-    ));
-    if (count($result) == 0) {
-      return false;
-    }else {
-      return $result[0];
-    }
-  }
-
-  /**
-   * Run a more complex query on this table
-   * @param  [type] $options [description]
-   * @return [type]          [description]
-   */
-  public static function query($options,$values=array()) {
-    $class = get_called_class();
-    $defaults = array(
-      'where'=>false,
-      'sort'=>$class::$SORT,
-      'limit'=>0,
-      'offset'=>0,
-    );
-    $options = array_replace_recursive($defaults,$options);
-    //build query as a string
-    //SELECT FROM statement
-      $query = 'SELECT ';
-      $cols = array();
-      foreach ($class::$FIELDS as $fieldName => $fieldInfo) {
-        $cols[] = $fieldInfo['col'];
-      }
-      $query .= implode(', ', $cols) . PHP_EOL;
-      $query .= 'FROM ' . $class::$TABLE . PHP_EOL;
-    //WHERE statement
-    if ($options['where']) {
-      $query .= 'WHERE' . PHP_EOL;
-      $query .= $options['where'] . PHP_EOL;
-    }
-    //ORDER BY statement
-    if ($options['sort']) {
-      $query .= 'ORDER BY' . PHP_EOL;
-      $query .= $options['sort'] . PHP_EOL;
-    }
-    //LIMIT/OFFSET statement
-    if ($options['limit']) {
-      $query .= 'LIMIT ' . $options['limit'] .PHP_EOL;
-    }
-    if ($options['offset']) {
-      $query .= 'OFFSET ' . $options['offset'] .PHP_EOL;
-    }
-    //Fix column names
-    $query = $class::queryColNameFormatter($query);
-    //Retrieve result
-    $conn = $class::getConnection();
-    $statement = $conn->prepare($query);
-    $statement->execute($values);
-    $results = $statement->fetchAll();
-    $objects = array();
-    foreach ($results as $row) {
-      $objects[] = new $class($row);
-    }
-    return $objects;
-  }
-
-  /**
-   * Replace @field@ references in a query with the current class' actual column
-   * names.
-   * @param  [type] $string [description]
-   * @return [type]         [description]
-   */
-  protected static function queryColNameFormatter($string) {
-    $class = get_called_class();
-    $string = preg_replace_callback('/@([^@]+)@/',function($match) use ($class) {
-      $col = $class::col($match[1]);
-      if ($col) {
-        return $col;
-      }else {
-        throw new \Exception("Couldn't find a field named " . $match[1], 1);
-      }
-    },$string);
-    return $string;
-  }
-
-  /**
-   * constructor should only be called by factories, so it's protected
-   * @param array $input PDO results from factory, or data from create() if you're building a whole new entry
-   * @param boolean $isNew whether or not this is a new entry
-   */
-  protected function __construct($input,$isNew=FALSE) {
-    $class = get_called_class();
-    foreach ($class::$FIELDS as $fieldID => $fieldInfo) {
-      $this->DATA[$fieldID] = $class::prepValuePostQuery($fieldID,$input[$fieldInfo['col']]);
-    }
-  }
-
   protected static function prepValuePostQuery($key,$value) {
     $class = get_called_class();
     $type = $class::$FIELDS[$key]['type'];
@@ -238,11 +282,41 @@ abstract class CRUDder {
   }
 
   /**
+   * Replace @@field@@ references in a query with the current class' actual column
+   * names.
+   * @param  [type] $string [description]
+   * @return [type]         [description]
+   */
+  protected static function queryColNameFormatter($string) {
+    $class = get_called_class();
+    $string = preg_replace_callback('/@@([^@]+)@@/',function($match) use ($class) {
+      $col = $class::col($match[1]);
+      if ($col) {
+        return $col;
+      }else {
+        throw new \Exception("Couldn't find a field named " . $match[1], 1);
+      }
+    },$string);
+    return $string;
+  }
+
+  /**
+   * constructor should only be called by factories, so it's protected
+   * @param array $input PDO results from factory, or data from create() if you're building a whole new entry
+   */
+  protected function __construct($input) {
+    $class = get_called_class();
+    foreach ($class::$FIELDS as $fieldID => $fieldInfo) {
+      $this->DATA[$fieldID] = $class::prepValuePostQuery($fieldID,$input[$fieldInfo['col']]);
+    }
+  }
+
+  /**
    * Get the proper column name of a field
    * @param  [type] $field [description]
    * @return [type]        [description]
    */
-  public static function col($field) {
+  protected static function col($field) {
     $class = get_called_class();
     if (isset($class::$FIELDS[$field])) {
       return $class::$FIELDS[$field]['col'];
@@ -256,11 +330,7 @@ abstract class CRUDder {
    */
   public function getKey() {
     $class = get_called_class();
-    if ($this->ISNEW) {
-      return false;
-    }else {
-      return $this->DATA[$class::$KEY];
-    }
+    return $this->DATA[$class::$KEY];
   }
 
   /**
@@ -280,7 +350,7 @@ abstract class CRUDder {
     $dump = "<table border='1' cellspacing='0' cellpadding='5' class='CRUDder-dump'>\n";
     $dump .= "<tr bgcolor='#eee'><td colspan='2'><strong>$class</strong></td><td>Changed</td></tr>\n";
     foreach ($class::$FIELDS as $fieldID => $fieldInfo) {
-      if (isset($this->CHANGED[$fieldID]) && $this->CHANGED[$fieldID]) {
+      if (isset($this->CHANGES[$fieldID]) && $this->CHANGES[$fieldID]) {
         $dump .= "<tr bgcolor='#ffc'>";
       }else {
         $dump .= "<tr bgcolor='#fff'>";
@@ -298,7 +368,7 @@ abstract class CRUDder {
         default:
           $dump .= "<td>".$this->$fieldID."</td>";
       }
-      if (isset($this->CHANGED[$fieldID])) {
+      if (isset($this->CHANGES[$fieldID])) {
         $dump .= "<td>X</td>";
       }else {
         $dump .= "<td>&nbsp;</td>";
@@ -309,14 +379,13 @@ abstract class CRUDder {
     if ($echo) {
       echo $dump;
     }
-    var_dump($this->CHANGED);
     return $dump;
   }
 
   /**
    * Use a generic getter so that objects can be used in the manner $someVariable = $instance->fieldName
    * @param  string $name the name of the field to get
-   * @return mixed     the value of the field, could be almost anything
+   * @return mixed     the value of the field by reference, could be almost anything
    */
   public function &__get($name) {
     if (array_key_exists($name, $this->DATA)) {
@@ -334,7 +403,7 @@ abstract class CRUDder {
 	public function __set($name,$value) {
     $class = get_called_class();
 		if (array_key_exists($name, $this->DATA) && $name != $class::$KEY) {
-			$this->CHANGED[$name] = true;
+			$this->CHANGES[$name] = true;
 			$this->DATA[$name] = $value;
 			return true;
 		}

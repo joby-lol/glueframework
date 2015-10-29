@@ -23,7 +23,7 @@ class Credentials extends Conf {
 }
 Credentials::$DIRS = array(
   GLUE_PATH . '/credentials',
-  GLUE_PATH . '/credentials/' . Conf::get('environment'),
+  GLUE_PATH . '/credentials/' . Conf::get('environment/type'),
   SITE_PATH . '/credentials',
-  SITE_PATH . '/credentials/' . Conf::get('environment')
+  SITE_PATH . '/credentials/' . Conf::get('environment/type')
 );
