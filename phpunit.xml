@@ -1,0 +1,7 @@
+<phpunit bootstrap="tests/bootstrap.php">
+  <testsuites>
+    <testsuite name="CRUDder">
+      <file>tests/glue/CRUDder/CRUDderTest.php</file>
+    </testsuite>
+  </testsuites>
+</phpunit>
