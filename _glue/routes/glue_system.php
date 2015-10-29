@@ -32,7 +32,7 @@ if (!Route::processed()) {
     Route::routeCodepages();
   }
 
-  if (Conf::get('Route/AutoRoute/enabled')) {
+  if (Conf::get('Route/autoroute/enabled')) {
     Route::routeAutoRoute();
   }
 }

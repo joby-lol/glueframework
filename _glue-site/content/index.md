@@ -18,6 +18,8 @@ be mapped to code or content in the following ways:
   pages. PHP files placed in `_glue-site/content` will be served as if they were
   markdown files. Code in them will execute in the namespace
   `\glue\codepages`.
+
+TODO: Rewrite to have AutoRoute enter a class statically
 * **AutoRoute** classes can be made by creating classes in the AutoRoute namespace.
   CamelCase class names will be converted to URLs such as `/camel-case`.
   Calls to those URLs and their subdirectories will be routed to the method

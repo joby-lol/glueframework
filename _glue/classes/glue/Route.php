@@ -43,9 +43,27 @@ class Route {
     }
   }
   static function routeMarkdown() {
-
+    if ($filename = static::findFileForRoute(Nanite::requestUri(),Conf::get('Route/content/path'),array('md'))) {
+      die('TODO: implement markdown content parsing');
+    }
+  }
+  static function routeCodepages() {
+    if ($filename = static::findFileForRoute(Nanite::requestUri(),Conf::get('Route/codepages/path'),array('php'))) {
+      die('TODO: implement codepages');
+    }
+  }
+  static function routeAutoRoute() {
+    $class = explode('/',Nanite::requestUri());
+    $class = strtolower($class[1]);
+    $class = preg_replace('/[^a-z0-9_\-]/i','',$class);
+    $class = preg_replace('/\-+/',' ',$class);
+    $class = ucwords($class);
+    $class = preg_replace('/ +/','',$class);
+    $class = '\\AutoRoute\\' . $class;
+    die('TODO: know how to route '.$class);
   }
   protected static function findFileForRoute($uri,$dir,$extensions) {
+    if ($uri == '/') $uri = '';
     foreach ($extensions as $ext) {
       $possibilities = array();
       $possibilities[] = $dir . $uri . '.' . $ext;
