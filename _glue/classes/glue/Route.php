@@ -18,43 +18,45 @@
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 namespace glue;
+
 use \glue\Template;
 use \Mni\FrontYAML\Parser;
 use \Nanite;
 
-class Route {
-    static function get($url, $handler)
+class Route
+{
+    public static function get ($url, $handler)
     {
-        Nanite::get($url,$handler);
+        Nanite::get($url, $handler);
     }
-    static function post($url, $handler)
+    public static function post($url, $handler)
     {
-        Nanite::get($url,$handler);
+        Nanite::get($url, $handler);
     }
-    static function any($url, $handler)
+    public static function any($url, $handler)
     {
         Nanite::get($url, $handler);
         Nanite::post($url, $handler);
     }
-    static function loadfile($file)
+    public static function loadfile($file)
     {
         include_once $file;
     }
-    static function processed()
+    public static function processed()
     {
         return Nanite::$routeProccessed;
     }
-    static function routeRedirects()
+    public static function routeRedirects()
     {
         if ($filename = static::findFileForRoute(static::requestUri(), Conf::get('Route/content/path'), array('url'))) {
-            $file = fopen($filename,'r');
+            $file = fopen($filename, 'r');
             $firstline = trim(fgets($file));
             fclose($file);
             header('Location: ' . $firstline);
             die();
         }
     }
-    static function routeMarkdown()
+    public static function routeMarkdown()
     {
         if ($filename = static::findFileForRoute(static::requestUri(), Conf::get('Route/content/path'),array('md'))) {
             $parser = new Parser();
@@ -62,13 +64,13 @@ class Route {
                 echo "<div><strong>Error:</strong> Failed to parse markdown/front-YAML</div>";
                 return;
             }
-            static::any(static::requestUri(),function() use ($document) {
+            static::any(static::requestUri(),function () use ($document) {
                 Template::setMulti($document->getYAML());
                 echo $document->getContent();
             });
         }
     }
-    static function routeStatic()
+    public static function routeStatic()
     {
         //This function should die as soon as it handles a file, because that way you skip templating
         $filename = Conf::get('Route/content/path') . static::requestUri();
@@ -81,15 +83,17 @@ class Route {
             }
         }
     }
-    static function routeCodepages()
+    public static function routeCodepages()
     {
-        if ($filename = static::findFileForRoute(static::requestUri(), Conf::get('Route/codepages/path'),array('php'))) {
+        $filename = static::findFileForRoute(static::requestUri(), Conf::get('Route/codepages/path'),array('php'));
+        if ($filename) {
             static::any(static::requestUri(), function() use ($filename) {
                 require($filename);
             });
         }
     }
-    static function routeAutoRoute() {
+    public static function routeAutoRoute()
+    {
         $class = explode('/', static::requestUri());
         $class = strtolower($class[1]);
         $class = preg_replace('/[^a-z0-9_\-]/i', '', $class);
@@ -97,22 +101,24 @@ class Route {
         $class = ucwords($class);
         $class = preg_replace('/ +/', '', $class);
         $class = '\\AutoRoute\\' . $class;
-            if (class_exists($class, true)) {
+        if (class_exists($class, true)) {
             if (method_exists($class, 'main')) {
                 static::any(static::requestUri().'(/.*)?', $class . '::main');
             }
         }
     }
-    static function requestUri() {
+    public static function requestUri()
+    {
         return Nanite::requestUri();
     }
-    protected static function findFileForRoute($uri,$dir,$extensions) {
+    protected static function findFileForRoute($uri, $dir, $extensions)
+    {
         if ($uri == '/') $uri = '';
         foreach ($extensions as $ext) {
             $possibilities = array();
             $possibilities[] = $dir . $uri . '.' . $ext;
             $possibilities[] = $dir . $uri . '/index.' . $ext;
-            foreach($possibilities as $file) {
+            foreach ($possibilities as $file) {
                 if (file_exists($file)) {
                     return $file;
                 }
