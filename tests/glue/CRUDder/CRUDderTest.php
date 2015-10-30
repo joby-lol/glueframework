@@ -48,11 +48,30 @@ class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
     public function testUpdateAndRead()
     {
         //add five objects to the table
-        BasicObject::create(static::$createArray1);
-        BasicObject::create(static::$createArray2);
-        BasicObject::create(static::$createArray1);
-        BasicObject::create(static::$createArray2);
-        BasicObject::create(static::$createArray1);
+        $f1 = BasicObject::create(static::$createArray1);
+        $f2 = BasicObject::create(static::$createArray2);
+        $f3 = BasicObject::create(static::$createArray1);
+        $f4 = BasicObject::create(static::$createArray2);
+        $f5 = BasicObject::create(static::$createArray1);
+        //edit items' fields
+        $f1->string = 'Updated object 1';
+        $f1->update();
+        $f3->string = 'Updated object 3';
+        $f3->update();
+        $f4->string = 'Updated object 4';
+        $f4->update();
+        //re-create items
+        $f1 = BasicObject::read($f1->id);
+        $f2 = BasicObject::read($f2->id);
+        $f3 = BasicObject::read($f3->id);
+        $f4 = BasicObject::read($f4->id);
+        $f5 = BasicObject::read($f5->id);
+        //assertions
+        $this->assertEquals('Updated object 1', $f1->string);
+        $this->assertEquals(static::$createArray2['string'], $f2->string);
+        $this->assertEquals('Updated object 3', $f3->string);
+        $this->assertEquals('Updated object 4', $f4->string);
+        $this->assertEquals(static::$createArray1['string'], $f5->string);
     }
 
     /**

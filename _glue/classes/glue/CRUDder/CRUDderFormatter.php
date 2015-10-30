@@ -29,12 +29,12 @@ class CRUDderFormatter
         $this->conn = &$conn;
         $this->config = $config;
     }
-    public function get($data)
+    public function get($field, $data)
     {
         //TODO: implement this
         return $data;
     }
-    public function set($data)
+    public function set($field, $data)
     {
         //TODO: implement this
         return $data;

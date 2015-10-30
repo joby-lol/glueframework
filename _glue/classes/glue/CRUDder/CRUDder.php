@@ -87,7 +87,7 @@ abstract class CRUDder implements CRUDderI
         //SELECT FROM statement
         $query = 'SELECT ';
         $cols = array();
-        foreach ($class::$cFields as $fieldName => $fieldInfo) {
+        foreach ($class::$config['fields'] as $fieldInfo) {
             $cols[] = $fieldInfo['col'];
         }
         $query .= implode(', ', $cols) . PHP_EOL;
@@ -143,7 +143,36 @@ abstract class CRUDder implements CRUDderI
     }
     public function update()
     {
-        die('TODO: implement update');
+        if (count($this->dataChanged) === 0) {
+            return;
+        }
+        $class = get_called_class();
+        $updates = array();
+        $values = array(
+            $class::$config['key'] => $this->__get($class::$config['key'])
+        );
+        foreach (array_flip($this->dataChanged) as $fieldName) {
+            $fieldInfo = $class::$cFields[$fieldName];
+            if ($fieldName != $class::$cKey) {
+                $updates[] = '@@' . $fieldName . '@@ = :' . $fieldName;
+                $values[] = static::$formatter->set($fieldName, $this->data[$fieldName]);
+            }
+        }
+        //build query as a string
+        $query = 'UPDATE ' . $class::$cTable . PHP_EOL;
+        $query .= 'SET ' . implode(', ',$updates) . PHP_EOL;
+        $query .= 'WHERE @@' . $class::$cKey . '@@ = :' . $class::$cKey . PHP_EOL;
+        //TODO: Enable/disable LIMIT 1 somewhere when configuring DB, it isn't supported in SQLite by default
+        //$query .= 'LIMIT 1';
+        //Fix column names
+        $query = $class::queryColNameFormatter($query);
+        //Execute query
+        $statement = $class::$conn->prepare($query);
+        $result = $statement->execute($values);
+        if ($result) {
+            $this->dataChanged = array();
+        }
+        return $result;
     }
     public function delete()
     {
@@ -168,20 +197,12 @@ abstract class CRUDder implements CRUDderI
         if (!isset($this->data[$key])) {
             return false;
         }
-        return static::$formatter->get(
-            $this->data[$key],
-            $this->config['fields'][$key],
-            $this->conn
-        );
+        return static::$formatter->get($key, $this->data[$key]);
     }
     public function __set($key, $val)
     {
-        $this->data[$key] = static::$formatter->set(
-            $this->data[$key],
-            $this->config['fields'][$key],
-            $this->conn
-        );
-        $this->dataChanged[$key] = true;
+        $this->data[$key] = static::$formatter->set($key, $val);
+        $this->dataChanged[$key] = $val;
     }
     //internal utility functions
     public static function getConfig()
