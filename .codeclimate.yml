@@ -1,7 +1,9 @@
----
+languages:
+  PHP: true
 engines:
   fixme:
     enabled: true
 ratings:
-  paths: []
+  paths:
+    - **.php
   exclude_paths: []
