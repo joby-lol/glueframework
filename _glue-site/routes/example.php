@@ -11,7 +11,7 @@ namespace glue\routes\glue_site;
 use glue\Route;
 use glue\Template;
 
-Route::get('/example-route',function(){
-  Template::set('pageTitle','Site page');
-  echo "<div>glue site-specific routed page</div>";
+Route::get('/example-route', function(){
+    Template::set('pageTitle', 'Site page');
+    echo "<div>glue site-specific routed page</div>";
 });

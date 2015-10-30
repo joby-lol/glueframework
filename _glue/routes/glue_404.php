@@ -23,7 +23,7 @@ use glue\Template;
 
 //404 page, nothing was routed
 if (!Route::processed()) {
-  header("HTTP/1.0 404 Not Found");
-  Template::set('pageTitle','404 Not Found');
-  echo "<p>File not found</p>";
+    header("HTTP/1.0 404 Not Found");
+    Template::set('pageTitle','404 Not Found');
+    echo "<p>File not found</p>";
 }

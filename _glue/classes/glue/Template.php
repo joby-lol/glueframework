@@ -19,56 +19,57 @@
  */
 namespace glue;
 
-class Template {
-  private static $FIELDS = array();
-  static $TEMPLATE = 'default';
-  private static $TEMPLATE_FILE = false;
-  static function set($key,$value) {
-    static::$FIELDS[$key] = $value;
-  }
-  static function setMulti($fields) {
-    if (is_array($fields)) {
-      foreach ($fields as $key => $value) {
-        static::set($key,$value);
-      }
+class Template
+{
+    private static $FIELDS = array();
+    static $TEMPLATE = 'default';
+    private static $TEMPLATE_FILE = false;
+    static function set($key,$value)
+    {
+        static::$FIELDS[$key] = $value;
     }
-  }
-  static function setBody($value) {
-    static::set('pageBody',$value);
-  }
-  static function setTemplate() {
-
-  }
-  static function getTemplate() {
-    foreach (array_reverse(Conf::get('Template/dirs')) as $path) {
-      foreach (array_reverse(Conf::get('Template/extensions')) as $extension) {
-        $filename = $path . '/' . static::$TEMPLATE . '.' . $extension;
-        if (file_exists($filename)) {
-          return file_get_contents($filename);
+    static function setMulti($fields)
+    {
+        if (is_array($fields)) {
+            foreach ($fields as $key => $value) {
+                static::set($key,$value);
+            }
         }
-      }
     }
-    return static::$FALLBACK_TEMPLATE;
-  }
-  static function getFields() {
-    return array_replace_recursive(
-      Conf::get('Template/fields'),
-      static::$FIELDS
-    );
-  }
-  private static $FALLBACK_TEMPLATE = "<!doctype html>
-<html>
-<head>
-<title>{{pageTitle}} :: {{siteTitle}}</title>
-</head>
-<body>
-<h1>{{pageTitle}}</h1>
-{{{pageBody}}}
-<hr/>
-<em>This is the Glue Framework last-resort template. If it is displaying, that means
-that any requested template could not be found, and a default template could not
-be loaded.</em>
-</body>
-</html>";
+    static function setBody($value)
+    {
+        static::set('pageBody',$value);
+    }
+    static function setTemplate()
+    {
+        //TODO: Make this do something
+    }
+    static function getTemplate()
+    {
+        foreach (array_reverse(Conf::get('Template/dirs')) as $path) {
+            foreach (array_reverse(Conf::get('Template/extensions')) as $extension) {
+                $filename = $path . '/' . static::$TEMPLATE . '.' . $extension;
+                if (file_exists($filename)) {
+                    return file_get_contents($filename);
+                }
+            }
+        }
+        return static::$FALLBACK_TEMPLATE;
+    }
+    static function getFields()
+    {
+        return array_replace_recursive(
+        Conf::get('Template/fields'),
+            static::$FIELDS
+        );
+    }
+    static function setFallbackTemplate ($template)
+    {
+        if ($template) {
+            static::$FALLBACK_TEMPLATE = $template;
+        }
+    }
+    private static $FALLBACK_TEMPLATE = '{{{pageBody}}}\n<!-- Something is very wrong. -->';
 }
+Template::setFallbackTemplate(file_get_contents(__DIR__ . '/Template-fallback.mustache'));
 Template::$TEMPLATE = Conf::get('Template/defaultTemplate');
