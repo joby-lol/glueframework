@@ -4,4 +4,4 @@ engines:
     enabled: true
 ratings:
   paths: []
-exclude_paths: []
+  exclude_paths: []
