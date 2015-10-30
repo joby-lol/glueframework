@@ -26,6 +26,13 @@ class Template {
   static function set($key,$value) {
     static::$FIELDS[$key] = $value;
   }
+  static function setMulti($fields) {
+    if (is_array($fields)) {
+      foreach ($fields as $key => $value) {
+        static::set($key,$value);
+      }
+    }
+  }
   static function setBody($value) {
     static::set('pageBody',$value);
   }

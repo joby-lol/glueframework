@@ -27,6 +27,7 @@ Route:
   # this list is intentionally rather sparse, as users can add their own
   # extensions via their site's Route.yaml, but can't easily disable the ones
   # specified here.
+  # TODO: rearrange staticExtensions to be keyed to extension, and include MIME
   staticExtensions:
     # the basics
     - htm

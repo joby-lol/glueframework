@@ -26,12 +26,15 @@ if (!Route::processed()) {
   if (Conf::get('Route/content/enabled')) {
     Route::routeRedirects();
     Route::routeMarkdown();
+    Route::routeStatic();
   }
-
+}
+if (!Route::processed()) {
   if (Conf::get('Route/codepages/enabled')) {
     Route::routeCodepages();
   }
-
+}
+if (!Route::processed()) {
   if (Conf::get('Route/autoroute/enabled')) {
     Route::routeAutoRoute();
   }

@@ -18,15 +18,12 @@ be mapped to code or content in the following ways:
   pages. PHP files placed in `_glue-site/content` will be served as if they were
   markdown files. Code in them will execute in the namespace
   `\glue\codepages`.
-
-TODO: Rewrite to have AutoRoute enter a class statically
 * **AutoRoute** classes can be made by creating classes in the AutoRoute namespace.
   CamelCase class names will be converted to URLs such as `/camel-case`.
   Calls to those URLs and their subdirectories will be routed to the method
   `route()` in the class, with subdirectories passed as arguments.
-  For example, given a class `\AutoRoute\SampleAutoRoute`, the url
-  `/sample-auto-route/arg1/arg2` would result in a call similar to
+  For example, given a class `\AutoRoute\ExampleAutoroute`, the url
+  `/example-autoroute/arg1/arg2` would result in a call similar to
   ```
-  $handler = new \AutoRoute\SampleAutoRoute();
-  $handler->route('arg1','arg2');
+  new \AutoRoute\ExampleAutoroute::main('/arg1/arg2');
   ```

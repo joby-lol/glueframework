@@ -18,6 +18,8 @@
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 namespace glue;
+use \glue\Template;
+use \Mni\FrontYAML\Parser;
 use \Nanite;
 
 class Route {
@@ -39,17 +41,30 @@ class Route {
   }
   static function routeRedirects() {
     if ($filename = static::findFileForRoute(Nanite::requestUri(),Conf::get('Route/content/path'),array('url'))) {
-      die('TODO: implement content redirects');
+      $file = fopen($filename,'r');
+      $firstline = trim(fgets($file));
+      fclose($file);
+      header('Location: ' . $firstline);
     }
   }
   static function routeMarkdown() {
     if ($filename = static::findFileForRoute(Nanite::requestUri(),Conf::get('Route/content/path'),array('md'))) {
-      die('TODO: implement markdown content parsing');
+      $parser = new Parser();
+      if (!($document = $parser->parse(file_get_contents($filename)))) {
+        echo "<div><strong>Error:</strong> Failed to parse markdown/front-YAML</div>";
+      }else {
+        Template::setMulti($document->getYAML());
+        echo $document->getContent();
+      }
     }
+  }
+  static function routeStatic() {
+    //This function should die as soon as it handles a file, because that way you skip templating
+    die('TODO: route static files');
   }
   static function routeCodepages() {
     if ($filename = static::findFileForRoute(Nanite::requestUri(),Conf::get('Route/codepages/path'),array('php'))) {
-      die('TODO: implement codepages');
+      glue_route_include($filename);
     }
   }
   static function routeAutoRoute() {
@@ -60,7 +75,11 @@ class Route {
     $class = ucwords($class);
     $class = preg_replace('/ +/','',$class);
     $class = '\\AutoRoute\\' . $class;
-    die('TODO: know how to route '.$class);
+    if (class_exists($class,true)) {
+      if (method_exists($class,'main')) {
+        static::any(Nanite::requestUri().'(/.*)?',$class . '::main');
+      }
+    }
   }
   protected static function findFileForRoute($uri,$dir,$extensions) {
     if ($uri == '/') $uri = '';
@@ -75,6 +94,13 @@ class Route {
       }
     }
   }
+}
+
+/**
+ * function used by Route to include codepages in a sterile environment
+ */
+function glue_route_include($file) {
+  include($file);
 }
 
 /**
