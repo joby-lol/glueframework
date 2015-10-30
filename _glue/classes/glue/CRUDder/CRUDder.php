@@ -82,7 +82,7 @@ abstract class CRUDder implements CRUDderI
             'limit'=>0,
             'offset'=>0,
         );
-        $options = array_replace_recursive($defaults,$options);
+        $options = array_replace_recursive($defaults, $options);
         //build query as a string
         //SELECT FROM statement
         $query = 'SELECT ';
@@ -138,9 +138,8 @@ abstract class CRUDder implements CRUDderI
         );
         if (count($result) == 0) {
             return false;
-        }else {
-            return $result[0];
         }
+        return $result[0];
     }
     public function update()
     {
@@ -192,14 +191,13 @@ abstract class CRUDder implements CRUDderI
     protected static function queryColNameFormatter($string)
     {
         $class = get_called_class();
-        $string = preg_replace_callback('/@@([^@]+)@@/',function($match) use ($class) {
+        $string = preg_replace_callback('/@@([^@]+)@@/', function ($match) use ($class) {
             $col = $class::getConfig()['fields'][$match[1]]['col'];
-            if ($col) {
-                return $col;
-            }else {
+            if (!$col) {
                 throw new \Exception("Couldn't find a field named " . $match[1], 1);
             }
-        },$string);
+            return $col;
+        }, $string);
         return $string;
     }
 }
