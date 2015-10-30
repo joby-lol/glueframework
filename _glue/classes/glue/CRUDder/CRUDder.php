@@ -316,7 +316,7 @@ abstract class CRUDder {
    * @param  [type] $field [description]
    * @return [type]        [description]
    */
-  protected static function col($field) {
+  public static function col($field) {
     $class = get_called_class();
     if (isset($class::$FIELDS[$field])) {
       return $class::$FIELDS[$field]['col'];

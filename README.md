@@ -1,6 +1,7 @@
 # Glue
-
 A PHP framework for sticking the old to the new.
+
+[![Build Status](https://travis-ci.org/jobyone/glueframework.svg?branch=initial-development-crudder)](https://travis-ci.org/jobyone/glueframework)
 
 Glue is a lightweight PHP framework designed for those who aren't building a new site from scratch. More often than not you can't just throw away all the code you've got on a website. Maybe you don't have the manpower, maybe you don't have the time. Maybe you realize that if it works you should probably just let it continue to work until you're good and ready to replace it.
 

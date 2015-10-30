@@ -45,6 +45,7 @@ class Route {
       $firstline = trim(fgets($file));
       fclose($file);
       header('Location: ' . $firstline);
+      die();
     }
   }
   static function routeMarkdown() {
@@ -74,7 +75,9 @@ class Route {
   }
   static function routeCodepages() {
     if ($filename = static::findFileForRoute(static::requestUri(),Conf::get('Route/codepages/path'),array('php'))) {
-      glue_route_include($filename);
+      static::any(static::requestUri(),function() use ($filename) {
+        require($filename);
+      });
     }
   }
   static function routeAutoRoute() {
@@ -107,13 +110,6 @@ class Route {
       }
     }
   }
-}
-
-/**
- * function used by Route to include codepages in a sterile environment
- */
-function glue_route_include($file) {
-  include($file);
 }
 
 /**
