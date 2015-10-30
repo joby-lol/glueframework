@@ -25,12 +25,17 @@ abstract class CRUDder implements CRUDderI
 {
     protected static $config = array();
     protected static $conn;
+    protected static $data = array();
+    protected static $dataChanged = array();
+    protected static $formatter;
+
     //Configuration methods
     public static function configureClass($yaml)
     {
         $newConfig = Yaml::parse($yaml);
         $class = get_called_class();
         $class::$config = array_replace_recursive($class::$config, $newConfig);
+        $class::$formatter = new CRUDderFormatter($class::$conn, $class::$config);
     }
     public static function configureDB($dsn, $username, $password)
     {
@@ -39,7 +44,25 @@ abstract class CRUDder implements CRUDderI
     //CRUD methods
     public static function create($data)
     {
-        die('TODO: implement create');
+        $class = get_called_class();
+        $cols = array();
+        $values = array();
+        foreach ($class::$config['fields'] as $fieldName => $fieldInfo) {
+            if ($fieldName != $class::$config['key']) {
+                $cols[] = $fieldInfo['col'];
+                $values[] = static::$formatter->quote($data[$fieldName]);
+            }
+        }
+        //build query as a string
+        $query = 'INSERT INTO ' . $class::$cTable . PHP_EOL;
+        $query .= '       (' . implode(', ', $cols) . ')' . PHP_EOL;
+        $query .= 'VALUES (' . implode(', ', $values) . ')';
+        $statement = static::$conn->prepare($query);
+        if (!$statement->execute()) {
+            return false;
+        }
+        $cKey = $conn->lastInsertId();
+        return $class::read($cKey);
     }
     public static function query($query)
     {
@@ -73,10 +96,18 @@ abstract class CRUDder implements CRUDderI
     //getting and setting
     public function &__get($key)
     {
-        die('TODO: implement getter');
+        return CRUDderFormatter::get(
+            $this->data[$key],
+            $this->config['fields'][$key],
+            $this->conn
+        );
     }
     public function __set($key,$val)
     {
-        die('TODO: implement setter');
+        $this->data[$key] = CRUDderFormatter::set(
+            $this->data[$key],
+            $this->config['fields'][$key],
+            $this->conn
+        );
     }
 }
