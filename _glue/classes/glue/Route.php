@@ -56,16 +56,16 @@ class Route {
     }
     static function routeMarkdown()
     {
-        if ($filename = static::findFileForRoute(static::requestUri(),Conf::get('Route/content/path'),array('md'))) {
+        if ($filename = static::findFileForRoute(static::requestUri(), Conf::get('Route/content/path'),array('md'))) {
             $parser = new Parser();
             if (!($document = $parser->parse(file_get_contents($filename)))) {
                 echo "<div><strong>Error:</strong> Failed to parse markdown/front-YAML</div>";
-            }else {
-                static::any(static::requestUri(),function() use ($document) {
-                    Template::setMulti($document->getYAML());
-                    echo $document->getContent();
-                });
+                return;
             }
+            static::any(static::requestUri(),function() use ($document) {
+                Template::setMulti($document->getYAML());
+                echo $document->getContent();
+            });
         }
     }
     static function routeStatic()
@@ -74,7 +74,7 @@ class Route {
         $filename = Conf::get('Route/content/path') . static::requestUri();
         $extension = explode('.',$filename);
         $extension = array_pop($extension);
-        if (array_key_exists($extension,Conf::get('Route/staticExtensions'))) {
+        if (array_key_exists($extension, Conf::get('Route/staticExtensions'))) {
             if (Conf::get('Route/staticExtensions')[$extension] && is_file($filename)) {
                 header("Content-Type: " . Conf::get('Route/staticExtensions')[$extension]);
                 die(file_get_contents($filename));
@@ -83,23 +83,23 @@ class Route {
     }
     static function routeCodepages()
     {
-        if ($filename = static::findFileForRoute(static::requestUri(),Conf::get('Route/codepages/path'),array('php'))) {
-            static::any(static::requestUri(),function() use ($filename) {
+        if ($filename = static::findFileForRoute(static::requestUri(), Conf::get('Route/codepages/path'),array('php'))) {
+            static::any(static::requestUri(), function() use ($filename) {
                 require($filename);
             });
         }
     }
     static function routeAutoRoute() {
-        $class = explode('/',static::requestUri());
+        $class = explode('/', static::requestUri());
         $class = strtolower($class[1]);
-        $class = preg_replace('/[^a-z0-9_\-]/i','',$class);
-        $class = preg_replace('/\-+/',' ',$class);
+        $class = preg_replace('/[^a-z0-9_\-]/i', '', $class);
+        $class = preg_replace('/\-+/', ' ', $class);
         $class = ucwords($class);
-        $class = preg_replace('/ +/','',$class);
+        $class = preg_replace('/ +/', '', $class);
         $class = '\\AutoRoute\\' . $class;
-            if (class_exists($class,true)) {
-            if (method_exists($class,'main')) {
-                static::any(static::requestUri().'(/.*)?',$class . '::main');
+            if (class_exists($class, true)) {
+            if (method_exists($class, 'main')) {
+                static::any(static::requestUri().'(/.*)?', $class . '::main');
             }
         }
     }

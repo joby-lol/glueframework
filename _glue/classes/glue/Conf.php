@@ -21,60 +21,61 @@ namespace glue;
 use \Symfony\Component\Yaml\Yaml;
 
 class Conf {
-  static $CONF = array();
-  static $DIRS = array();
+    public static $sConf = array();
+    public static $sDirs = array();
 
-  static function get($request) {
-    $request = explode('/',$request);
-    //try to load named file if it hasn't been loaded
-    if (!key_exists($request[0],static::$CONF)) {
-      static::load($request[0]);
+    static function get($request) {
+        $request = explode('/', $request);
+        //try to load named file if it hasn't been loaded
+        if (!key_exists($request[0], static::$sConf)) {
+            static::load($request[0]);
+        }
+        //return the appropriate bit of the config array
+        $return = static::$sConf;
+        foreach ($request as $sub) {
+            if (!array_key_exists($sub, $return)) {
+                return false;
+            }
+            $return = $return[$sub];
+        }
+        return static::tidy($return);
     }
-    //return the appropriate bit of the config array
-    $return = static::$CONF;
-    foreach ($request as $sub) {
-      if (key_exists($sub,$return)) {
-        $return = $return[$sub];
-      }else {
-        return false;
-      }
+
+    static function tidy($request) {
+        if (is_array($request)) {
+            foreach ($request as $key => $value) {
+                $request[$key] = static::tidy($value);
+            }
+            return $request;
+        }
+        $request = preg_replace_callback('/@@[a-z0-9\/\-_]+@@/i', function($matches){
+            $return = str_replace('@@', '', $matches[0]);
+            $return = Conf::get($return);
+            return $return;
+        },$request);
+        return $request;
     }
-    return static::tidy($return);
-  }
-  static function tidy($request) {
-    if (is_array($request)) {
-      foreach ($request as $key => $value) {
-        $request[$key] = static::tidy($value);
-      }
-    }else {
-      $request = preg_replace_callback('/@@[a-z0-9\/\-_]+@@/i',function($matches){
-        $return = str_replace('@@','',$matches[0]);
-        $return = Conf::get($return);
-        return $return;
-      },$request);
+
+    static function load ($file) {
+        $file = preg_replace('/[^a-z0-9\-_]/i','',$file);
+        $paths = static::$sDirs;
+        foreach (array_flip($paths) as $key) {
+            $paths[$key] .= '/' . $file . '.yaml';
+        }
+        foreach ($paths as $filename) {
+            if (file_exists($filename)) {
+                static::loadFile($filename);
+            }
+        }
     }
-    return $request;
-  }
-  static function load ($file) {
-    $file = preg_replace('/[^a-z0-9\-_]/i','',$file);
-    $paths = static::$DIRS;
-    foreach ($paths as $key => $path) {
-      $paths[$key] .= '/' . $file . '.yaml';
+    private static function loadFile($filename) {
+        $data = Yaml::parse(file_get_contents($filename));
+        static::$sConf = array_replace_recursive(static::$sConf, $data);
     }
-    foreach ($paths as $filename) {
-      if (file_exists($filename)) {
-        static::loadFile($filename);
-      }
-    }
-  }
-  private static function loadFile($filename) {
-    $data = Yaml::parse(file_get_contents($filename));
-    static::$CONF = array_replace_recursive(static::$CONF,$data);
-  }
 }
-Conf::$CONF['GLUE_PATH'] = GLUE_PATH;
-Conf::$CONF['SITE_PATH'] = SITE_PATH;
-Conf::$DIRS = array(
-  GLUE_PATH . '/config',
-  SITE_PATH . '/config'
+Conf::$sConf['GLUE_PATH'] = GLUE_PATH;
+Conf::$sConf['SITE_PATH'] = SITE_PATH;
+Conf::$sDirs = array(
+    GLUE_PATH . '/config',
+    SITE_PATH . '/config'
 );

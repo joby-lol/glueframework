@@ -80,10 +80,10 @@ Class TestCRUDder extends CRUDder {
     }
 }
 class BasicObject extends TestCRUDder {
-    protected static $TABLE = 'BasicObject';
-    protected static $KEY = 'id';
-    protected static $SORT = '@@id@@ DESC';
-    protected static $FIELDS = array(
+    protected static $cTable = 'BasicObject';
+    protected static $cKey = 'id';
+    protected static $cSort = '@@id@@ DESC';
+    protected static $cFields = array(
         'id' => array(
             'col' => 'bo_id',
             'type' => 'int'
