@@ -21,13 +21,12 @@ namespace glue\CRUDder;
 
 interface CRUDderI
 {
-    const FALSEVAL = false;
     // Configuration
     public static function configureClass($yaml);
     public static function configureDB($dsn, $username, $password);
     // Basic CRUD
     public static function create($data);
-    public static function query($query);
+    public static function query($options, $values);
     public static function read($key);
     public function update();
     public function delete();
@@ -36,6 +35,6 @@ interface CRUDderI
     public static function transactionCommit();
     public static function transactionDiscard();
     // get/set
-    public function &__get($key);
+    public function __get($key);
     public function __set($key, $val);
 }

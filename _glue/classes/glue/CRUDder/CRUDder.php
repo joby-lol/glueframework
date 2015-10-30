@@ -23,10 +23,11 @@ use \Symfony\Component\Yaml\Yaml;
 
 abstract class CRUDder implements CRUDderI
 {
+    protected $data = array();
+    protected $dataChanged = array();
+
     protected static $config = array();
     protected static $conn;
-    protected static $data = array();
-    protected static $dataChanged = array();
     protected static $formatter;
 
     //Configuration methods
@@ -40,6 +41,14 @@ abstract class CRUDder implements CRUDderI
     public static function configureDB($dsn, $username, $password)
     {
         static::$conn = DB::getConnection($dsn, $username, $password);
+    }
+    //Constructor -- protected so it can only be called by factories
+    protected function __construct($input)
+    {
+        $class = get_called_class();
+        foreach ($class::$config['fields'] as $fieldID => $fieldInfo) {
+            $this->data[$fieldID] = $input[$fieldInfo['col']];
+        }
     }
     //CRUD methods
     public static function create($data)
@@ -64,7 +73,7 @@ abstract class CRUDder implements CRUDderI
         $cKey = static::$conn->lastInsertId();
         return $class::read($cKey);
     }
-    public static function query($options)
+    public static function query($options, $values)
     {
         $class = get_called_class();
         $defaults = array(
@@ -103,8 +112,7 @@ abstract class CRUDder implements CRUDderI
         //Fix column names
         $query = $class::queryColNameFormatter($query);
         //Retrieve result
-        $conn = $class::getConnection();
-        $statement = $conn->prepare($query);
+        $statement = $class::$conn->prepare($query);
         if ($statement->execute($values) === false) {
             return false;
         }
@@ -117,7 +125,22 @@ abstract class CRUDder implements CRUDderI
     }
     public static function read($key)
     {
-        die('TODO: implement read');
+        $class = get_called_class();
+        $result = $class::query(
+            array(//query
+                'sort' => false,
+                'where' => '@@' . $class::$config['key'] . '@@ = :' . $class::$config['key'],
+                'limit' => 1
+            ),
+            array(//values
+                $class::$config['key'] => $key
+            )
+        );
+        if (count($result) == 0) {
+            return false;
+        }else {
+            return $result[0];
+        }
     }
     public function update()
     {
@@ -141,9 +164,12 @@ abstract class CRUDder implements CRUDderI
         die('TODO: implement transactionDiscard');
     }
     //getting and setting
-    public function &__get($key)
+    public function __get($key)
     {
-        return CRUDderFormatter::get(
+        if (!isset($this->data[$key])) {
+            return false;
+        }
+        return static::$formatter->get(
             $this->data[$key],
             $this->config['fields'][$key],
             $this->conn
@@ -151,10 +177,29 @@ abstract class CRUDder implements CRUDderI
     }
     public function __set($key, $val)
     {
-        $this->data[$key] = CRUDderFormatter::set(
+        $this->data[$key] = static::$formatter->set(
             $this->data[$key],
             $this->config['fields'][$key],
             $this->conn
         );
+        $this->dataChanged[$key] = true;
+    }
+    //internal utility functions
+    public static function getConfig()
+    {
+        return static::$config;
+    }
+    protected static function queryColNameFormatter($string)
+    {
+        $class = get_called_class();
+        $string = preg_replace_callback('/@@([^@]+)@@/',function($match) use ($class) {
+            $col = $class::getConfig()['fields'][$match[1]]['col'];
+            if ($col) {
+                return $col;
+            }else {
+                throw new \Exception("Couldn't find a field named " . $match[1], 1);
+            }
+        },$string);
+        return $string;
     }
 }

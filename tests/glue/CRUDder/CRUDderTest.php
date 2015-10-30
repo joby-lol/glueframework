@@ -61,6 +61,7 @@ class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
     public function getConnection() {
         $pdo = DB::getConnection('sqlite::memory:', null, null);
         //basicObject schema
+        $pdo->exec('DROP TABLE IF EXISTS BasicObject');
         $pdo->exec('CREATE TABLE BasicObject (
             bo_id INTEGER PRIMARY KEY AUTOINCREMENT,
             bo_string VARCHAR(30) NOT NULL)');
@@ -76,10 +77,7 @@ class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
     }
 }
 
-Class TestCRUDder extends CRUDder
-{
-    
-}
+Class TestCRUDder extends CRUDder {}
 TestCRUDder::configureDB('sqlite::memory:', null, null);
 
 class BasicObject extends TestCRUDder
