@@ -228,7 +228,8 @@ abstract class CRUDder implements CRUDderI
     {
         $class = get_called_class();
         $string = preg_replace_callback('/@@([^@]+)@@/', function ($match) use ($class) {
-            $col = $class::getConfig()['fields'][$match[1]]['col'];
+            $col = $class::getConfig();
+            $col = $col['fields'][$match[1]]['col'];
             if (!$col) {
                 throw new \Exception("Couldn't find a field named " . $match[1], 1);
             }
