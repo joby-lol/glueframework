@@ -76,10 +76,12 @@ class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
 
 Class TestCRUDder extends CRUDder
 {
-    protected static function &getConnection() {
-        return CRUDderTest::$conn;
-    }
+    // protected static function &getConnection() {
+    //     return CRUDderTest::$conn;
+    // }
 }
+TestCRUDder::configureDB('sqlite::memory:', null, null);
+
 class BasicObject extends TestCRUDder
 {
     protected static $cTable = 'BasicObject';
@@ -96,3 +98,4 @@ class BasicObject extends TestCRUDder
         )
     );
 }
+BasicObject::configureClass(file_get_contents(__DIR__ . '/BasicObject.yaml'));

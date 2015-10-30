@@ -1,0 +1,10 @@
+table: BasicObject
+key: id
+defaultSort: @@id@@ DESC
+fields:
+  id:
+    col: bo_id
+    type: int
+  string:
+    col: bo_string
+    type: string
