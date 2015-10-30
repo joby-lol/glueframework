@@ -18,6 +18,8 @@
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 use \glue\CRUDder\CRUDder;
+use \glue\CRUDder\CRUDderFormatter;
+use \glue\CRUDder\DB;
 
 class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
 {
@@ -46,23 +48,85 @@ class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
     public function testUpdateAndRead()
     {
         //add five objects to the table
-        BasicObject::create(static::$createArray1);
-        BasicObject::create(static::$createArray2);
-        BasicObject::create(static::$createArray1);
-        BasicObject::create(static::$createArray2);
-        BasicObject::create(static::$createArray1);
+        $f1 = BasicObject::create(static::$createArray1);
+        $f2 = BasicObject::create(static::$createArray2);
+        $f3 = BasicObject::create(static::$createArray1);
+        $f4 = BasicObject::create(static::$createArray2);
+        $f5 = BasicObject::create(static::$createArray1);
+        //edit items' fields
+        $f1->string = 'Updated object 1';
+        $f1->update();
+        $f3->string = 'Updated object 3';
+        $f3->update();
+        $f4->string = 'Updated object 4';
+        $f4->update();
+        //re-create items
+        $f1 = BasicObject::read($f1->id);
+        $f2 = BasicObject::read($f2->id);
+        $f3 = BasicObject::read($f3->id);
+        $f4 = BasicObject::read($f4->id);
+        $f5 = BasicObject::read($f5->id);
+        //assertions
+        $this->assertEquals('Updated object 1', $f1->string);
+        $this->assertEquals(static::$createArray2['string'], $f2->string);
+        $this->assertEquals('Updated object 3', $f3->string);
+        $this->assertEquals('Updated object 4', $f4->string);
+        $this->assertEquals(static::$createArray1['string'], $f5->string);
+    }
+
+    public function testCreateAndQueryAndDelete()
+    {
+        //add five objects to the table
+        $f1 = BasicObject::create(static::$createArray1);
+        $f2 = BasicObject::create(static::$createArray2);
+        $f3 = BasicObject::create(static::$createArray1);
+        $f4 = BasicObject::create(static::$createArray2);
+        $f5 = BasicObject::create(static::$createArray1);
+        //count objects
+        $q = BasicObject::query(
+            array(
+                'where' => '@@id@@ > 0'
+            ),
+            array()
+        );
+        $this->assertEquals(5, count($q));
+        //remove 1 item
+        $f2->delete();
+        //count objects
+        $q = BasicObject::query(
+            array(
+                'where' => '@@id@@ > 0'
+            ),
+            array()
+        );
+        $this->assertEquals(4, count($q));
+        //check that removed object is actually gone and
+        //remove all items
+        foreach ($q as $item) {
+            $this->assertNotEquals($f2->id,$item->id);
+            $item->delete();
+        }
+        //count objects
+        $q = BasicObject::query(
+            array(
+                'where' => '@@id@@ > 0'
+            ),
+            array()
+        );
+        $this->assertEquals(0, count($q));
     }
 
     /**
     * @return PHPUnit_Extensions_Database_DB_IDatabaseConnection
     */
     public function getConnection() {
-        $pdo = new PDO('sqlite::memory:');
+        $pdo = DB::getConnection('sqlite::memory:', null, null);
         //basicObject schema
+        $pdo->exec('DROP TABLE IF EXISTS BasicObject');
         $pdo->exec('CREATE TABLE BasicObject (
             bo_id INTEGER PRIMARY KEY AUTOINCREMENT,
             bo_string VARCHAR(30) NOT NULL)');
-        static::$conn = $pdo;
+        static::$conn = &$pdo;
         //return
         return $this->createDefaultDBConnection(static::$conn);
     }
@@ -74,12 +138,9 @@ class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
     }
 }
 
-Class TestCRUDder extends CRUDder
-{
-    protected static function &getConnection() {
-        return CRUDderTest::$conn;
-    }
-}
+Class TestCRUDder extends CRUDder {}
+TestCRUDder::configureDB('sqlite::memory:', null, null);
+
 class BasicObject extends TestCRUDder
 {
     protected static $cTable = 'BasicObject';
@@ -96,3 +157,4 @@ class BasicObject extends TestCRUDder
         )
     );
 }
+BasicObject::configureClass(file_get_contents(__DIR__ . '/BasicObject.yaml'));
