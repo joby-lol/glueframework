@@ -21,7 +21,8 @@ namespace glue\CRUDder;
 
 use \Symfony\Component\Yaml\Yaml;
 
-interface iCRUDder {
+interface CRUDderI
+{
     const FALSEVAL = false;
     // Configuration
     public static function configureClass($yaml);
@@ -41,7 +42,8 @@ interface iCRUDder {
     public function __set($key,$val);
 }
 
-abstract class CRUDder implements iCRUDder {
+abstract class CRUDder implements CRUDderI
+{
     protected static $config = array();
     protected static $conn;
     //Configuration methods
