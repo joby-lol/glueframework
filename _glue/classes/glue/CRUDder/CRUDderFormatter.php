@@ -26,8 +26,10 @@ class CRUDderFormatter
 
     public function __construct($conn, $config)
     {
-        $this->conn = $conn;
+        $this->conn = &$conn;
         $this->config = $config;
+        var_dump($this->conn);
+        var_dump($this->config);
     }
     public function get($data)
     {

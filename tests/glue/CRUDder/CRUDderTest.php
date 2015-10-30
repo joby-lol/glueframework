@@ -18,6 +18,8 @@
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 use \glue\CRUDder\CRUDder;
+use \glue\CRUDder\CRUDderFormatter;
+use \glue\CRUDder\DB;
 
 class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
 {
@@ -57,12 +59,12 @@ class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
     * @return PHPUnit_Extensions_Database_DB_IDatabaseConnection
     */
     public function getConnection() {
-        $pdo = new PDO('sqlite::memory:');
+        $pdo = DB::getConnection('sqlite::memory:', null, null);
         //basicObject schema
         $pdo->exec('CREATE TABLE BasicObject (
             bo_id INTEGER PRIMARY KEY AUTOINCREMENT,
             bo_string VARCHAR(30) NOT NULL)');
-        static::$conn = $pdo;
+        static::$conn = &$pdo;
         //return
         return $this->createDefaultDBConnection(static::$conn);
     }
@@ -76,9 +78,7 @@ class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
 
 Class TestCRUDder extends CRUDder
 {
-    // protected static function &getConnection() {
-    //     return CRUDderTest::$conn;
-    // }
+    
 }
 TestCRUDder::configureDB('sqlite::memory:', null, null);
 
