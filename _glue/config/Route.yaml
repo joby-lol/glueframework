@@ -27,23 +27,22 @@ Route:
   # this list is intentionally rather sparse, as users can add their own
   # extensions via their site's Route.yaml, but can't easily disable the ones
   # specified here.
-  # TODO: rearrange staticExtensions to be keyed to extension, and include MIME
   staticExtensions:
     # the basics
-    - htm
-    - html
-    - css
-    - js
+    htm: text/html
+    html: text/html
+    css: text/css
+    js: application/javascript
     # images
-    - gif
-    - jpg
-    - jpeg
-    - png
-    - svg
-    - bmp
-    - webp
+    gif: image/gif
+    jpg: image/jpeg
+    jpeg: image/jpeg
+    png: image/png
+    svg: image/svg+xml
+    bmp: image/bmp
+    webp: image/webp
     # documents - office is intentionally excluded
-    - pdf
+    pdf: application/pdf
   # currently there are no system routes in this location
   routes:
   # loaded in the reverse of the order shown here, always after routes
