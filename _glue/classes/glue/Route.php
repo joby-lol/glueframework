@@ -18,6 +18,8 @@
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 namespace glue;
+use \glue\Template;
+use \Mni\FrontYAML\Parser;
 use \Nanite;
 
 class Route {
@@ -38,14 +40,62 @@ class Route {
     return Nanite::$routeProccessed;
   }
   static function routeRedirects() {
-    if ($filename = static::findFileForRoute(Nanite::requestUri(),Conf::get('Route/content/path'),array('url'))) {
-      die('TODO: implement content redirects');
+    if ($filename = static::findFileForRoute(static::requestUri(),Conf::get('Route/content/path'),array('url'))) {
+      $file = fopen($filename,'r');
+      $firstline = trim(fgets($file));
+      fclose($file);
+      header('Location: ' . $firstline);
     }
   }
   static function routeMarkdown() {
-
+    if ($filename = static::findFileForRoute(static::requestUri(),Conf::get('Route/content/path'),array('md'))) {
+      $parser = new Parser();
+      if (!($document = $parser->parse(file_get_contents($filename)))) {
+        echo "<div><strong>Error:</strong> Failed to parse markdown/front-YAML</div>";
+      }else {
+        static::any(static::requestUri(),function() use ($document) {
+          Template::setMulti($document->getYAML());
+          echo $document->getContent();
+        });
+      }
+    }
+  }
+  static function routeStatic() {
+    //This function should die as soon as it handles a file, because that way you skip templating
+    $filename = Conf::get('Route/content/path') . static::requestUri();
+    $extension = explode('.',$filename);
+    $extension = array_pop($extension);
+    if (array_key_exists($extension,Conf::get('Route/staticExtensions'))) {
+      if (Conf::get('Route/staticExtensions')[$extension] && is_file($filename)) {
+        header("Content-Type: " . Conf::get('Route/staticExtensions')[$extension]);
+        die(file_get_contents($filename));
+      }
+    }
+  }
+  static function routeCodepages() {
+    if ($filename = static::findFileForRoute(static::requestUri(),Conf::get('Route/codepages/path'),array('php'))) {
+      glue_route_include($filename);
+    }
+  }
+  static function routeAutoRoute() {
+    $class = explode('/',static::requestUri());
+    $class = strtolower($class[1]);
+    $class = preg_replace('/[^a-z0-9_\-]/i','',$class);
+    $class = preg_replace('/\-+/',' ',$class);
+    $class = ucwords($class);
+    $class = preg_replace('/ +/','',$class);
+    $class = '\\AutoRoute\\' . $class;
+    if (class_exists($class,true)) {
+      if (method_exists($class,'main')) {
+        static::any(static::requestUri().'(/.*)?',$class . '::main');
+      }
+    }
+  }
+  static function requestUri() {
+    return Nanite::requestUri();
   }
   protected static function findFileForRoute($uri,$dir,$extensions) {
+    if ($uri == '/') $uri = '';
     foreach ($extensions as $ext) {
       $possibilities = array();
       $possibilities[] = $dir . $uri . '.' . $ext;
@@ -57,6 +107,13 @@ class Route {
       }
     }
   }
+}
+
+/**
+ * function used by Route to include codepages in a sterile environment
+ */
+function glue_route_include($file) {
+  include($file);
 }
 
 /**

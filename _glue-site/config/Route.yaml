@@ -7,3 +7,7 @@
 Route:
   routes:
     - example
+  staticExtensions:
+    # Add your own static extensions by adding them and their MIME as shown
+    # To disable a default extension, set its MIME to "false"
+    html: text/html
