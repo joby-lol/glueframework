@@ -9,7 +9,7 @@
  */
 namespace glue;
 
-define('GLUE_PATH',__DIR__ . '/_glue');
-define('SITE_PATH',__DIR__ . '/_glue-site');
+define('GLUE_PATH', __DIR__ . '/_glue');
+define('SITE_PATH', __DIR__ . '/_glue-site');
 
 require GLUE_PATH . '/glue.php';

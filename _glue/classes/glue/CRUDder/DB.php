@@ -18,30 +18,33 @@
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 namespace glue\CRUDder;
-class DB {
-  private static $CONNS = array();
-  /**
-   * throw an exception if anybody tries to instantiate -- this class
-   * is meant to be strictly static
-   */
-  function __construct() {
-    throw new Exception(get_class() . " is not allowed to be instantiated!", 1);
-  }
-  /**
-   * Get a reference to a PDO object connected to the given DB.
-   * Tries to maintain only one connection to each database.
-   * @param  string $DB_DSN      connection string
-   * @param  string $DB_USERNAME username
-   * @param  string $DB_PASSWORD password
-   * @return PDO              reference to PDO object
-   */
-  static function &getConnection ($DB_DSN, $DB_USERNAME, $DB_PASSWORD) {
-    $connID = md5($DB_DSN . $DB_USERNAME . $DB_PASSWORD);
-    if (!key_exists($connID, static::$CONNS)) {
-      static::$CONNS[$connID] = new \PDO($DB_DSN, $DB_USERNAME, $DB_PASSWORD);
-      static::$CONNS[$connID]->setAttribute(\PDO::ATTR_PERSISTENT, TRUE);
-      static::$CONNS[$connID]->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+class DB
+{
+    private static $conns = array();
+    /**
+    * throw an exception if anybody tries to instantiate -- this class
+    * is meant to be strictly static
+    */
+    function __construct()
+    {
+        throw new Exception(get_class() . " is not allowed to be instantiated!", 1);
     }
-    return static::$CONNS[$connID];
-  }
+    /**
+    * Get a reference to a PDO object connected to the given DB.
+    * Tries to maintain only one connection to each database.
+    * @param  string $dbDSN      connection string
+    * @param  string $dbUsername username
+    * @param  string $dbPassword password
+    * @return PDO              reference to PDO object
+    */
+    static function &getConnection ($dbDSN, $dbUsername, $dbPassword)
+    {
+        $connID = md5($dbDSN . $dbUsername . $dbPassword);
+        if (!key_exists($connID, static::$conns)) {
+            static::$conns[$connID] = new \PDO($dbDSN, $dbUsername, $dbPassword);
+            static::$conns[$connID]->setAttribute(\PDO::ATTR_PERSISTENT, TRUE);
+            static::$conns[$connID]->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        }
+        return static::$conns[$connID];
+    }
 }

@@ -23,36 +23,38 @@ use glue\Route;
 use glue\Template;
 
 if (!Route::processed()) {
-  if (Conf::get('Route/content/enabled')) {
-    Route::routeRedirects();
-    Route::routeMarkdown();
-    Route::routeStatic();
-  }
+    if (Conf::get('Route/content/enabled')) {
+        Route::routeRedirects();
+        Route::routeMarkdown();
+        Route::routeStatic();
+    }
 }
 if (!Route::processed()) {
-  if (Conf::get('Route/codepages/enabled')) {
-    Route::routeCodepages();
-  }
+    if (Conf::get('Route/codepages/enabled')) {
+        Route::routeCodepages();
+    }
 }
 if (!Route::processed()) {
-  if (Conf::get('Route/autoroute/enabled')) {
-    Route::routeAutoRoute();
-  }
+    if (Conf::get('Route/autoroute/enabled')) {
+        Route::routeAutoRoute();
+    }
 }
 
 //Warn if GLUE_PATH or SITE_PATH are in the document root
 if (!Conf::get('environment/suppress_public_path_warnings')) {
-  $nDOC_ROOT = str_replace('\\','/',$_SERVER['DOCUMENT_ROOT']);
-  $nGLUE_PATH = str_replace('\\','/',GLUE_PATH);
-  $nSITE_PATH = str_replace('\\','/',SITE_PATH);
-  if (strpos($nGLUE_PATH,$nDOC_ROOT) === 0) {
-    echo "<div><strong>Warning:</strong> Your GLUE_PATH is inside the document root.
-    It's protected by a .htaccess file, but best practice is to move it outside your public web directory.
-    <br/>You can suppress this warning by setting <em>suppress_public_path_warnings: true</em> in environment.yaml.</div>";
-  }
-  if (strpos($nSITE_PATH,$nDOC_ROOT) === 0) {
-    echo "<div><strong>Warning:</strong> Your SITE_PATH is inside the document root.
-    It's protected by a .htaccess file, but best practice is to move it outside your public web directory.
-    <br/>You can suppress this warning by setting <em>suppress_public_path_warnings: true</em> in environment.yaml.</div>";
-  }
+    $nDOC_ROOT = str_replace('\\','/', $_SERVER['DOCUMENT_ROOT']);
+    $nGLUE_PATH = str_replace('\\','/', GLUE_PATH);
+    $nSITE_PATH = str_replace('\\','/', SITE_PATH);
+    if (strpos($nGLUE_PATH,$nDOC_ROOT) === 0) {
+        echo "<div><strong>Warning:</strong> Your GLUE_PATH is inside the document root.
+            It's protected by a .htaccess file, but best practice is to move it outside your public web directory.
+            <br/>You can suppress this warning by setting <em>suppress_public_path_warnings: true</em>
+            in environment.yaml.</div>";
+    }
+    if (strpos($nSITE_PATH,$nDOC_ROOT) === 0) {
+        echo "<div><strong>Warning:</strong> Your SITE_PATH is inside the document root.
+            It's protected by a .htaccess file, but best practice is to move it outside your public web directory.
+            <br/>You can suppress this warning by setting <em>suppress_public_path_warnings: true</em> in
+            environment.yaml.</div>";
+    }
 }
