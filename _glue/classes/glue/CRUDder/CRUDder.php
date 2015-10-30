@@ -64,9 +64,56 @@ abstract class CRUDder implements CRUDderI
         $cKey = static::$conn->lastInsertId();
         return $class::read($cKey);
     }
-    public static function query($query)
+    public static function query($options)
     {
-        die('TODO: implement query');
+        $class = get_called_class();
+        $defaults = array(
+            'where'=>false,
+            'sort'=>$class::$cSort,
+            'limit'=>0,
+            'offset'=>0,
+        );
+        $options = array_replace_recursive($defaults,$options);
+        //build query as a string
+        //SELECT FROM statement
+        $query = 'SELECT ';
+        $cols = array();
+        foreach ($class::$cFields as $fieldName => $fieldInfo) {
+            $cols[] = $fieldInfo['col'];
+        }
+        $query .= implode(', ', $cols) . PHP_EOL;
+        $query .= 'FROM ' . $class::$cTable . PHP_EOL;
+        //WHERE statement
+        if ($options['where']) {
+            $query .= 'WHERE' . PHP_EOL;
+            $query .= $options['where'] . PHP_EOL;
+        }
+        //ORDER BY statement
+        if ($options['sort']) {
+            $query .= 'ORDER BY' . PHP_EOL;
+            $query .= $options['sort'] . PHP_EOL;
+        }
+        //LIMIT/OFFSET statement
+        if ($options['limit']) {
+            $query .= 'LIMIT ' . $options['limit'] .PHP_EOL;
+        }
+        if ($options['offset']) {
+            $query .= 'OFFSET ' . $options['offset'] .PHP_EOL;
+        }
+        //Fix column names
+        $query = $class::queryColNameFormatter($query);
+        //Retrieve result
+        $conn = $class::getConnection();
+        $statement = $conn->prepare($query);
+        if ($statement->execute($values) === false) {
+            return false;
+        }
+        $results = $statement->fetchAll();
+        $objects = array();
+        foreach ($results as $row) {
+            $objects[] = new $class($row);
+        }
+        return $objects;
     }
     public static function read($key)
     {
