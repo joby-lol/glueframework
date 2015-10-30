@@ -25,7 +25,7 @@ use \Nanite;
 
 class Route
 {
-    public static function get ($url, $handler)
+    public static function get($url, $handler)
     {
         Nanite::get($url, $handler);
     }
@@ -58,13 +58,13 @@ class Route
     }
     public static function routeMarkdown()
     {
-        if ($filename = static::findFileForRoute(static::requestUri(), Conf::get('Route/content/path'),array('md'))) {
+        if ($filename = static::findFileForRoute(static::requestUri(), Conf::get('Route/content/path'), array('md'))) {
             $parser = new Parser();
             if (!($document = $parser->parse(file_get_contents($filename)))) {
                 echo "<div><strong>Error:</strong> Failed to parse markdown/front-YAML</div>";
                 return;
             }
-            static::any(static::requestUri(),function () use ($document) {
+            static::any(static::requestUri(), function () use ($document) {
                 Template::setMulti($document->getYAML());
                 echo $document->getContent();
             });
@@ -74,7 +74,7 @@ class Route
     {
         //This function should die as soon as it handles a file, because that way you skip templating
         $filename = Conf::get('Route/content/path') . static::requestUri();
-        $extension = explode('.',$filename);
+        $extension = explode('.', $filename);
         $extension = array_pop($extension);
         if (array_key_exists($extension, Conf::get('Route/staticExtensions'))) {
             if (Conf::get('Route/staticExtensions')[$extension] && is_file($filename)) {
@@ -85,7 +85,7 @@ class Route
     }
     public static function routeCodepages()
     {
-        $filename = static::findFileForRoute(static::requestUri(), Conf::get('Route/codepages/path'),array('php'));
+        $filename = static::findFileForRoute(static::requestUri(), Conf::get('Route/codepages/path'), array('php'));
         if ($filename) {
             static::any(static::requestUri(), function() use ($filename) {
                 require($filename);
@@ -113,7 +113,9 @@ class Route
     }
     protected static function findFileForRoute($uri, $dir, $extensions)
     {
-        if ($uri == '/') $uri = '';
+        if ($uri == '/') {
+            $uri = '';
+        }
         foreach ($extensions as $ext) {
             $possibilities = array();
             $possibilities[] = $dir . $uri . '.' . $ext;
@@ -130,11 +132,12 @@ class Route
 /**
  * This function is used in glue.php to load routes
  */
-function glue_load_routes() {
+function glue_load_routes()
+{
     //routes consist of Route/routes with Route/system appended
     $routes = Conf::get('Route/routes');
     $sysroutes = array_reverse(Conf::get('Route/system'));
-    foreach($sysroutes as $route) {
+    foreach ($sysroutes as $route) {
         $routes[] = $route;
     }
     //Site routes can override system routes

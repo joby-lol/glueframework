@@ -17,6 +17,8 @@
   * with this program; if not, write to the Free Software Foundation, Inc.,
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+namespace glue\Tests;
+
 use \glue\CRUDder\CRUDder;
 
 class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
@@ -74,12 +76,14 @@ class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
     }
 }
 
-Class TestCRUDder extends CRUDder {
+Class TestCRUDder extends CRUDder
+{
     protected static function &getConnection() {
         return CRUDderTest::$conn;
     }
 }
-class BasicObject extends TestCRUDder {
+class BasicObject extends TestCRUDder
+{
     protected static $cTable = 'BasicObject';
     protected static $cKey = 'id';
     protected static $cSort = '@@id@@ DESC';

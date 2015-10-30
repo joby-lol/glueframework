@@ -18,13 +18,15 @@
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 namespace glue;
+
 use \Symfony\Component\Yaml\Yaml;
 
 class Conf {
     public static $sConf = array();
     public static $sDirs = array();
 
-    static function get($request) {
+    public static function get($request)
+    {
         $request = explode('/', $request);
         //try to load named file if it hasn't been loaded
         if (!key_exists($request[0], static::$sConf)) {
@@ -41,14 +43,15 @@ class Conf {
         return static::tidy($return);
     }
 
-    static function tidy($request) {
+    protected static function tidy($request)
+    {
         if (is_array($request)) {
             foreach ($request as $key => $value) {
                 $request[$key] = static::tidy($value);
             }
             return $request;
         }
-        $request = preg_replace_callback('/@@[a-z0-9\/\-_]+@@/i', function($matches){
+        $request = preg_replace_callback('/@@[a-z0-9\/\-_]+@@/i', function ($matches) {
             $return = str_replace('@@', '', $matches[0]);
             $return = Conf::get($return);
             return $return;
@@ -56,8 +59,9 @@ class Conf {
         return $request;
     }
 
-    static function load ($file) {
-        $file = preg_replace('/[^a-z0-9\-_]/i','',$file);
+    public static function load($file)
+    {
+        $file = preg_replace('/[^a-z0-9\-_]/i', '', $file);
         $paths = static::$sDirs;
         foreach (array_flip($paths) as $key) {
             $paths[$key] .= '/' . $file . '.yaml';
