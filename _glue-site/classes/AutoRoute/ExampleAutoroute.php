@@ -11,8 +11,8 @@ namespace AutoRoute;
 use \glue\Template;
 
 class ExampleAutoroute {
-  public static function main() {
-    Template::set('pageTitle','Example AutoRoute');
-    echo "<p>This is a page produced by \AutoRoute\ExampleAutoroute::route()</p>";
-  }
+    public static function main() {
+        Template::set('pageTitle', 'Example AutoRoute');
+        echo "<p>This is a page produced by \AutoRoute\ExampleAutoroute::route()</p>";
+    }
 }
