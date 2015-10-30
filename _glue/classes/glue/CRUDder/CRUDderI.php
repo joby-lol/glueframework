@@ -37,5 +37,5 @@ interface CRUDderI
     public static function transactionDiscard();
     // get/set
     public function &__get($key);
-    public function __set($key,$val);
+    public function __set($key, $val);
 }

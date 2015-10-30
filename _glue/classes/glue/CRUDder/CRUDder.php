@@ -61,7 +61,7 @@ abstract class CRUDder implements CRUDderI
         if (!$statement->execute()) {
             return false;
         }
-        $cKey = $conn->lastInsertId();
+        $cKey = static::$conn->lastInsertId();
         return $class::read($cKey);
     }
     public static function query($query)
@@ -102,7 +102,7 @@ abstract class CRUDder implements CRUDderI
             $this->conn
         );
     }
-    public function __set($key,$val)
+    public function __set($key, $val)
     {
         $this->data[$key] = CRUDderFormatter::set(
             $this->data[$key],

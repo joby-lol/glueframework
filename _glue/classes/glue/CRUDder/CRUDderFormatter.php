@@ -23,8 +23,9 @@ class CRUDderFormatter
 {
     protected $conn;
     protected $config;
-    
-    public function __construct($conn, $config) {
+
+    public function __construct($conn, $config)
+    {
         $this->conn = $conn;
         $this->config = $config;
     }
@@ -38,7 +39,8 @@ class CRUDderFormatter
         //TODO: implement this
         return $data;
     }
-    public function quote($data) {
+    public function quote($data)
+    {
         return $this->conn->quote($data);
     }
 }
