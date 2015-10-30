@@ -1,7 +1,9 @@
----
 engines:
+  phpmd:
+    enabled: true
   fixme:
     enabled: true
 ratings:
-  paths: []
-exclude_paths: []
+  paths:
+    - **.php
+  exclude_paths: []
