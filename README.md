@@ -1,7 +1,7 @@
 # Glue
 A PHP framework for sticking the old to the new.
 
-[![Build Status](https://travis-ci.org/jobyone/glueframework.svg?branch=initial-development)](https://travis-ci.org/jobyone/glueframework)
+[![Build Status](https://travis-ci.org/jobyone/glueframework.svg?branch=master)](https://travis-ci.org/jobyone/glueframework)
 [![Code Climate](https://codeclimate.com/github/jobyone/glueframework/badges/gpa.svg)](https://codeclimate.com/github/jobyone/glueframework)
 [![Test Coverage](https://codeclimate.com/github/jobyone/glueframework/badges/coverage.svg)](https://codeclimate.com/github/jobyone/glueframework/coverage)
 
