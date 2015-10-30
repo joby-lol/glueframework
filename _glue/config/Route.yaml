@@ -1,0 +1,51 @@
+# Glue Framework
+# Copyright (C) 2015 Joby Elliott
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+Route:
+  content:
+    enabled: true
+    path: "@@SITE_PATH@@/content"
+  codepages:
+    enabled: true
+    path: "@@SITE_PATH@@/content"
+  autoroute:
+    enabled: true
+  # the following extensions will be served as-is from Route/content/path
+  # this list is intentionally rather sparse, as users can add their own
+  # extensions via their site's Route.yaml, but can't easily disable the ones
+  # specified here.
+  staticExtensions:
+    # the basics
+    htm: text/html
+    html: text/html
+    css: text/css
+    js: application/javascript
+    # images
+    gif: image/gif
+    jpg: image/jpeg
+    jpeg: image/jpeg
+    png: image/png
+    svg: image/svg+xml
+    bmp: image/bmp
+    webp: image/webp
+    # documents - office is intentionally excluded
+    pdf: application/pdf
+  # currently there are no system routes in this location
+  routes:
+  # loaded in the reverse of the order shown here, always after routes
+  system:
+    404: glue_404
+    system: glue_system

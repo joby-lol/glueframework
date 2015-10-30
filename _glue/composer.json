@@ -1,0 +1,18 @@
+{
+    "name": "glue/glue-core",
+    "description": "Glue framework core",
+    "license": "GPLv2",
+    "authors": [
+      {
+        "name": "Joby Elliott",
+        "email": "joby@byjoby.com"
+      }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+      "symfony/yaml": "^2.7",
+      "mnapoli/front-yaml": "^1.5",
+      "nirix/nanite": "^1.0",
+      "mustache/mustache": "^2.9"
+    }
+}

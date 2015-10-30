@@ -1,0 +1,38 @@
+/**
+  * Glue Framework
+  * Copyright (C) 2015 Joby Elliott
+  *
+  * This file is not licensed along with the rest of the Glue Framework. It is
+  * released into the public domain, and you are free to modify or re-use it
+  * in any way.
+
+Note that glue will automatically load vendor/autoload from your site directory
+if it exists. There is no need to do it yourself.
+
+Glue also already includes the following composer packages:
+- symfony/yaml
+- mnapoli/front-yaml
+- nirix/nanite
+- mustache/mustache
+- phpunit/phpunit
+- phpunit/dbunit
+
+ */
+{
+    "name": "you/your-site",
+    "description": "Glue framework site",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Name",
+            "email": "you@yoursite.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+
+    },
+    "require-dev": {
+
+    }
+}
