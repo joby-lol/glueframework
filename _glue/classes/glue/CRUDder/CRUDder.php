@@ -25,6 +25,7 @@ abstract class CRUDder implements CRUDderI
 {
     protected $data = array();
     protected $dataChanged = array();
+    protected $delete = false;
 
     protected static $config = array();
     protected static $conn;
@@ -143,7 +144,7 @@ abstract class CRUDder implements CRUDderI
     }
     public function update()
     {
-        if (count($this->dataChanged) === 0) {
+        if (count($this->dataChanged) === 0 || $this->deleted) {
             return;
         }
         $class = get_called_class();
@@ -159,9 +160,9 @@ abstract class CRUDder implements CRUDderI
             }
         }
         //build query as a string
-        $query = 'UPDATE ' . $class::$cTable . PHP_EOL;
+        $query = 'UPDATE ' . $class::$config['table'] . PHP_EOL;
         $query .= 'SET ' . implode(', ',$updates) . PHP_EOL;
-        $query .= 'WHERE @@' . $class::$cKey . '@@ = :' . $class::$cKey . PHP_EOL;
+        $query .= 'WHERE @@' . $class::$config['key'] . '@@ = :' . $class::$config['key'] . PHP_EOL;
         //TODO: Enable/disable LIMIT 1 somewhere when configuring DB, it isn't supported in SQLite by default
         //$query .= 'LIMIT 1';
         //Fix column names
@@ -176,7 +177,21 @@ abstract class CRUDder implements CRUDderI
     }
     public function delete()
     {
-        die('TODO: implement delete');
+        if ($this->deleted) {
+            return;
+        }
+        $class = get_called_class();
+        $values = array(
+            $class::$config['key'] => $this->__get($class::$config['key'])
+        );
+        //build query
+        $query = 'DELETE FROM ' . $class::$cTable . PHP_EOL;
+        $query .= 'WHERE @@' . $class::$config['key'] . '@@ = :' . $class::$config['key'] . PHP_EOL;
+        //Fix column names
+        $query = $class::queryColNameFormatter($query);
+        //Execute query
+        $statement = $class::$conn->prepare($query);
+        $statement->execute($values);
     }
     //transactions
     public static function transactionStart()

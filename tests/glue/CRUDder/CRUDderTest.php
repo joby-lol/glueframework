@@ -74,6 +74,48 @@ class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
         $this->assertEquals(static::$createArray1['string'], $f5->string);
     }
 
+    public function testCreateAndQueryAndDelete()
+    {
+        //add five objects to the table
+        $f1 = BasicObject::create(static::$createArray1);
+        $f2 = BasicObject::create(static::$createArray2);
+        $f3 = BasicObject::create(static::$createArray1);
+        $f4 = BasicObject::create(static::$createArray2);
+        $f5 = BasicObject::create(static::$createArray1);
+        //count objects
+        $q = BasicObject::query(
+            array(
+                'where' => '@@id@@ > 0'
+            ),
+            array()
+        );
+        $this->assertEquals(5, count($q));
+        //remove 1 item
+        $f2->delete();
+        //count objects
+        $q = BasicObject::query(
+            array(
+                'where' => '@@id@@ > 0'
+            ),
+            array()
+        );
+        $this->assertEquals(4, count($q));
+        //check that removed object is actually gone and
+        //remove all items
+        foreach ($q as $item) {
+            $this->assertNotEquals($f2->id,$item->id);
+            $item->delete();
+        }
+        //count objects
+        $q = BasicObject::query(
+            array(
+                'where' => '@@id@@ > 0'
+            ),
+            array()
+        );
+        $this->assertEquals(0, count($q));
+    }
+
     /**
     * @return PHPUnit_Extensions_Database_DB_IDatabaseConnection
     */
