@@ -21,27 +21,6 @@ namespace glue\CRUDder;
 
 use \Symfony\Component\Yaml\Yaml;
 
-interface CRUDderI
-{
-    const FALSEVAL = false;
-    // Configuration
-    public static function configureClass($yaml);
-    public static function configureDB($dsn, $username, $password);
-    // Basic CRUD
-    public static function create($data);
-    public static function query($query);
-    public static function read($key);
-    public function update();
-    public function delete();
-    // transactions
-    public static function transactionStart();
-    public static function transactionCommit();
-    public static function transactionDiscard();
-    // get/set
-    public function &__get($key);
-    public function __set($key,$val);
-}
-
 abstract class CRUDder implements CRUDderI
 {
     protected static $config = array();
