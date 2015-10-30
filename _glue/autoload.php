@@ -22,34 +22,34 @@ namespace glue;
 /**
  * Load composer autoloaders if necessary
  */
-function glue_include_once_if_exists($file) {
-  if (file_exists($file)) {
-    include_once($file);
-  }
+function glue_include_once_if_exists($file)
+{
+    if (file_exists($file)) {
+        include_once($file);
+    }
 }
-glue_include_once_if_exists(GLUE_PATH . '/vendor/autoload.php');
-glue_include_once_if_exists(SITE_PATH . '/vendor/autoload.php');
 
 /**
  * PSR-4 autoloader, will search first in SITE_PATH/classes, then in
  * GLUE_PATH/classes
  * @return boolean whether or not class was found
  */
-function glue_autoload($class) {
-  $paths = array();
-  $paths[] = SITE_PATH . '/classes';
-  $paths[] = GLUE_PATH . '/classes';
-  $classfile = str_replace('\\','/',$class);
-  $classfile .= '.php';
-  foreach ($paths as $path) {
-    $filename = $path . '/' . $classfile;
-    if (file_exists($filename)) {
-      include_once $filename;
-      if (class_exists($class)) {
-        return true;
-      }
+function glue_autoload($class)
+{
+    $paths = array();
+    $paths[] = SITE_PATH . '/classes';
+    $paths[] = GLUE_PATH . '/classes';
+    $classfile = str_replace('\\', '/', $class);
+    $classfile .= '.php';
+    foreach ($paths as $path) {
+        $filename = $path . '/' . $classfile;
+        if (file_exists($filename)) {
+            include_once $filename;
+            if (class_exists($class)) {
+                return true;
+            }
+        }
     }
-  }
-  return false;
+    return false;
 }
 spl_autoload_register('\glue\glue_autoload');

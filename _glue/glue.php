@@ -23,6 +23,8 @@ define('PAGE_RENDER_START', microtime(TRUE));
 
 // get autoloader
 require GLUE_PATH . '/autoload.php';
+glue_include_once_if_exists(GLUE_PATH . '/vendor/autoload.php');
+glue_include_once_if_exists(SITE_PATH . '/vendor/autoload.php');
 glue_autoload('\glue\Route');//must be explicitly loaded
 
 // Load site-specific glue.php, between setup and final template output
