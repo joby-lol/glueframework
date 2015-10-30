@@ -17,11 +17,13 @@
   * with this program; if not, write to the Free Software Foundation, Inc.,
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+namespace glue\CRUDder\CoreTest;
+
 use \glue\CRUDder\CRUDder;
 use \glue\CRUDder\CRUDderFormatter;
 use \glue\CRUDder\DB;
 
-class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
+class CRUDderTest extends \PHPUnit_Extensions_Database_TestCase
 {
     public static $conn = null;
     protected static $createArray1 = array(
@@ -134,7 +136,7 @@ class CRUDderTest extends PHPUnit_Extensions_Database_TestCase
     * @return PHPUnit_Extensions_Database_DataSet_IDataSet
     */
     public function getDataSet() {
-        return new PHPUnit_Extensions_Database_DataSet_DefaultDataSet();
+        return new \PHPUnit_Extensions_Database_DataSet_DefaultDataSet();
     }
 }
 

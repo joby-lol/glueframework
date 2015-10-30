@@ -31,9 +31,9 @@ interface CRUDderI
     public function update();
     public function delete();
     // transactions
-    public static function transactionStart();
-    public static function transactionCommit();
-    public static function transactionDiscard();
+    public static function beginTransaction();
+    public static function commit();
+    public static function rollback();
     // get/set
     public function __get($key);
     public function __set($key, $val);
