@@ -1,6 +1,6 @@
-languages:
-  PHP: true
 engines:
+  phpmd:
+    enabled: true
   fixme:
     enabled: true
 ratings:
