@@ -153,7 +153,6 @@ abstract class CRUDder implements CRUDderI
             $class::$config['key'] => $this->__get($class::$config['key'])
         );
         foreach (array_flip($this->dataChanged) as $fieldName) {
-            $fieldInfo = $class::$cFields[$fieldName];
             if ($fieldName != $class::$cKey) {
                 $updates[] = '@@' . $fieldName . '@@ = :' . $fieldName;
                 $values[] = static::$formatter->set($fieldName, $this->data[$fieldName]);
@@ -163,7 +162,6 @@ abstract class CRUDder implements CRUDderI
         $query = 'UPDATE ' . $class::$config['table'] . PHP_EOL;
         $query .= 'SET ' . implode(', ',$updates) . PHP_EOL;
         $query .= 'WHERE @@' . $class::$config['key'] . '@@ = :' . $class::$config['key'] . PHP_EOL;
-        //TODO: Enable/disable LIMIT 1 somewhere when configuring DB, it isn't supported in SQLite by default
         //$query .= 'LIMIT 1';
         //Fix column names
         $query = $class::queryColNameFormatter($query);
