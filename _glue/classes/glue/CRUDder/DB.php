@@ -25,7 +25,7 @@ class DB
     * throw an exception if anybody tries to instantiate -- this class
     * is meant to be strictly static
     */
-    function __construct()
+    public function __construct()
     {
         throw new Exception(get_class() . " is not allowed to be instantiated!", 1);
     }
@@ -37,7 +37,7 @@ class DB
     * @param  string $dbPassword password
     * @return PDO              reference to PDO object
     */
-    static function &getConnection ($dbDSN, $dbUsername, $dbPassword)
+    public static function &getConnection ($dbDSN, $dbUsername, $dbPassword)
     {
         $connID = md5($dbDSN . $dbUsername . $dbPassword);
         if (!key_exists($connID, static::$conns)) {

@@ -45,7 +45,7 @@ function glue_autoload($class)
         $filename = $path . '/' . $classfile;
         if (file_exists($filename)) {
             include_once $filename;
-            if (class_exists($class)) {
+            if (class_exists($class) || interface_exists($class)) {
                 return true;
             }
         }
