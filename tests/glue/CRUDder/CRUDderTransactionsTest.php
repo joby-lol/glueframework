@@ -35,15 +35,34 @@ class CRUDderTransactionsTest extends \PHPUnit_Extensions_Database_TestCase
 
     public function testTransactions()
     {
-        $this->assertTrue(BasicObject::beginTransaction());
+        //Test the basics -- do commit() and rollback() work?
+        $t = BasicObject::getTransacter();
+        $this->assertTrue($t->beginTransaction());
         //add an object and rollback
         $f1 = BasicObject::create(static::$createArray1);
-        BasicObject::rollback();
+        $this->assertTrue($t->rollback());
+        $this->assertTrue($t->beginTransaction());
         //there should be no ID 1
         $this->assertFalse(BasicObject::read(1),'rollback() didn\'t prevent changes from saving');
         //add an object and commit
         $f1 = BasicObject::create(static::$createArray1);
-        $this->assertTrue(BasicObject::commit());//no way to test commit
+        $this->assertTrue($t->commit());//no way to test commit, so we just make sure it doesn't blow up
+    }
+    public function testTransactionResolutionOrder()
+    {
+        //Test that transactions enforce proper commit/rollback order
+        $top = BasicObject::getTransacter();
+        $middle = BasicObject::getTransacter();
+        $bottom = BasicObject::getTransacter();
+        $this->assertTrue($top->beginTransaction());
+            $this->assertTrue($middle->beginTransaction());
+                $this->assertFalse($top->rollback());
+                $this->assertTrue($bottom->beginTransaction());
+                    $this->assertFalse($top->rollback());
+                    $this->assertFalse($middle->rollback());
+                $this->assertTrue($bottom->rollback());
+            $this->assertTrue($middle->rollback());
+        $this->assertTrue($top->rollback());
     }
 
     /**
