@@ -18,6 +18,9 @@
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 namespace glue;
+
+use \Mustache_Engine;
+
 ob_start();
 define('PAGE_RENDER_START', microtime(TRUE));
 
@@ -38,11 +41,14 @@ define('PAGE_RENDER_END', microtime(TRUE));
 echo "<!-- Page took " . (PAGE_RENDER_END-PAGE_RENDER_START) . "s to generate -->";
 
 // Drop output into Template and render with mustache engine
-use \Mustache_Engine;
-$m = new Mustache_Engine;
-Template::setBody(ob_get_clean());
-ob_end_clean();
-echo $m->render(
-  Template::getTemplate(),
-  Template::getFields()
-);
+$body = ob_get_clean();
+if (Template::$rawOutputActive) {
+    echo Template::$rawOutputContent;
+}else {
+    Template::setBody($body);
+    $m = new Mustache_Engine;
+    echo $m->render(
+      Template::getTemplate(),
+      Template::getFields()
+    );
+}

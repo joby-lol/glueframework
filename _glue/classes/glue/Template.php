@@ -21,8 +21,10 @@ namespace glue;
 
 class Template
 {
+    public static $template = 'default';
+    public static $rawOutputActive = false;
+    public static $rawOutputContent = '';
     private static $fields = array();
-    static $template = 'default';
     private static $fallbackTemplate = '{{{pageBody}}}\n<!-- Something is very wrong. -->';
 
     public static function set($key,$value)
@@ -37,13 +39,18 @@ class Template
             }
         }
     }
+    public static function rawOutput($out = "")
+    {
+        static::$rawOutputContent = $out;
+        static::$rawOutputActive = true;
+    }
     public static function setBody($value)
     {
         static::set('pageBody',$value);
     }
-    public static function setTemplate()
+    public static function setTemplate($template)
     {
-        //TODO: Make this do something
+        static::$template = $template;
     }
     public static function getTemplate()
     {

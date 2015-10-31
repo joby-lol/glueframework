@@ -17,30 +17,23 @@
   * with this program; if not, write to the Free Software Foundation, Inc.,
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-namespace glue\CRUDder;
+namespace glueExtras\CRUDder;
 
-class CRUDderFormatter
+
+interface CRUDderI
 {
-    protected $conn;
-    protected $config;
-
-    public function __construct($conn, $config)
-    {
-        $this->conn = &$conn;
-        $this->config = $config;
-    }
-    public function get($field, $data)
-    {
-        //TODO: implement this
-        return $data;
-    }
-    public function set($field, $data)
-    {
-        //TODO: implement this
-        return $data;
-    }
-    public function quote($data)
-    {
-        return $this->conn->quote($data);
-    }
+    // Configuration
+    public static function configureClass($yaml);
+    public static function configureDB($dsn, $username, $password);
+    // Basic CRUD
+    public static function create($data);
+    public static function query($options, $values);
+    public static function read($key);
+    public function update();
+    public function delete();
+    // transactions
+    public static function getTransacter();
+    // get/set
+    public function __get($key);
+    public function __set($key, $val);
 }
