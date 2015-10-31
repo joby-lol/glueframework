@@ -53,7 +53,7 @@ class Route
             $firstline = trim(fgets($file));
             fclose($file);
             header('Location: ' . $firstline);
-            die();
+            Template::rawOutput();
         }
     }
     public static function routeMarkdown()
@@ -79,7 +79,7 @@ class Route
         if (array_key_exists($extension, Conf::get('Route/staticExtensions'))) {
             if (Conf::get('Route/staticExtensions')[$extension] && is_file($filename)) {
                 header("Content-Type: " . Conf::get('Route/staticExtensions')[$extension]);
-                die(file_get_contents($filename));
+                Template::rawOutput(file_get_contents($filename));
             }
         }
     }
