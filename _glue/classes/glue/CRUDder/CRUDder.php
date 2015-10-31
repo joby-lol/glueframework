@@ -194,17 +194,10 @@ abstract class CRUDder implements CRUDderI
         $statement->execute($values);
     }
     //transactions
-    public static function transactionStart()
+    public static function getTransacter()
     {
-        die('TODO: implement transactionStart');
-    }
-    public static function transactionCommit()
-    {
-        die('TODO: implement transactionCommit');
-    }
-    public static function transactionDiscard()
-    {
-        die('TODO: implement transactionDiscard');
+        $class = get_called_class();
+        return new Transacter($class::$conn);
     }
     //getting and setting
     public function __get($key)
