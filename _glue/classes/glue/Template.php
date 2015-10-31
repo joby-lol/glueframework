@@ -22,8 +22,8 @@ namespace glue;
 class Template
 {
     public static $template = 'default';
-    public static $staticOutputActive = false;
-    public static $staticOutputContent = '';
+    public static $rawOutputActive = false;
+    public static $rawOutputContent = '';
     private static $fields = array();
     private static $fallbackTemplate = '{{{pageBody}}}\n<!-- Something is very wrong. -->';
 
@@ -39,10 +39,10 @@ class Template
             }
         }
     }
-    public static function staticOutput($out = "")
+    public static function rawOutput($out = "")
     {
-        static::$staticOutputContent = $out;
-        static::$staticOutputActive = true;
+        static::$rawOutputContent = $out;
+        static::$rawOutputActive = true;
     }
     public static function setBody($value)
     {

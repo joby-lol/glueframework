@@ -17,11 +17,11 @@
   * with this program; if not, write to the Free Software Foundation, Inc.,
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-namespace glue\CRUDder\CoreTest;
+namespace glueExtras\CRUDder\CoreTest;
 
-use \glue\CRUDder\CRUDder;
-use \glue\CRUDder\CRUDderFormatter;
-use \glue\CRUDder\DB;
+use \glueExtras\CRUDder\CRUDder;
+use \glueExtras\CRUDder\CRUDderFormatter;
+use \glueExtras\CRUDder\DB;
 
 class CRUDderTest extends \PHPUnit_Extensions_Database_TestCase
 {

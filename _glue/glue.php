@@ -42,8 +42,8 @@ echo "<!-- Page took " . (PAGE_RENDER_END-PAGE_RENDER_START) . "s to generate --
 
 // Drop output into Template and render with mustache engine
 $body = ob_get_clean();
-if (Template::$staticOutputActive) {
-    echo Template::$staticOutputContent;
+if (Template::$rawOutputActive) {
+    echo Template::$rawOutputContent;
 }else {
     Template::setBody($body);
     $m = new Mustache_Engine;

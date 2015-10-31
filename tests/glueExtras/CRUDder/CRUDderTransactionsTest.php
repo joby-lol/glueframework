@@ -19,9 +19,9 @@
  */
 namespace glue\CRUDder\TransactionsTest;
 
-use \glue\CRUDder\CRUDder;
-use \glue\CRUDder\CRUDderFormatter;
-use \glue\CRUDder\DB;
+use \glueExtras\CRUDder\CRUDder;
+use \glueExtras\CRUDder\CRUDderFormatter;
+use \glueExtras\CRUDder\DB;
 
 class CRUDderTransactionsTest extends \PHPUnit_Extensions_Database_TestCase
 {

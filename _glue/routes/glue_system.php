@@ -21,22 +21,23 @@ namespace glue\routes\glue_system;
 use glue\Conf;
 use glue\Route;
 use glue\Template;
+use glueExtras\RouteTools;
 
 if (!Route::processed()) {
-    if (Conf::get('Route/content/enabled')) {
-        Route::routeRedirects();
-        Route::routeMarkdown();
-        Route::routeStatic();
+    if (Conf::get('glueExtras/RouteTools/content/enabled')) {
+        RouteTools::routeRedirects();
+        RouteTools::routeMarkdown();
+        RouteTools::routeStatic();
     }
 }
 if (!Route::processed()) {
-    if (Conf::get('Route/codepages/enabled')) {
-        Route::routeCodepages();
+    if (Conf::get('glueExtras/RouteTools/codepages/enabled')) {
+        RouteTools::routeCodepages();
     }
 }
 if (!Route::processed()) {
-    if (Conf::get('Route/autoroute/enabled')) {
-        Route::routeAutoRoute();
+    if (Conf::get('glueExtras/RouteTools/autoroute/enabled')) {
+        RouteTools::routeAutoRoute();
     }
 }
 
