@@ -43,7 +43,7 @@ class Route
     }
     public static function processed()
     {
-        return Nanite::$routeProccessed;
+        return Nanite::$routeProccessed || Template::$rawOutputActive;
     }
     public static function requestUri()
     {
