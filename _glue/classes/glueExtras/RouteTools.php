@@ -56,8 +56,6 @@ class RouteTools
         $filename = Conf::get('glueExtras/RouteTools/content/path') . Route::requestUri();
         $extension = explode('.', $filename);
         $extension = array_pop($extension);
-        var_dump($filename);
-        var_dump(Conf::get('glueExtras/RouteTools/staticExtensions'));
         if (array_key_exists($extension, Conf::get('glueExtras/RouteTools/staticExtensions'))) {
             if (Conf::get('glueExtras/RouteTools/staticExtensions')[$extension] && is_file($filename)) {
                 header("Content-Type: " . Conf::get('glueExtras/RouteTools/staticExtensions')[$extension]);
