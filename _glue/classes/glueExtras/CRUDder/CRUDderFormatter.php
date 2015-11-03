@@ -23,50 +23,23 @@ class CRUDderFormatter
 {
     protected $conn;
     protected $config;
+    protected static $getHandlers = array();
 
     public function __construct($conn, $config)
     {
         $this->conn = &$conn;
         $this->config = $config;
     }
-    public function get($field, $data)
-    {
+    public static function registerGetHandler($type,$handler) {
+        if (function_exists($handler)) {
+            static::$getHandlers[$type] = $handler;
+        }
+    }
+    public function get($field, $data) {
         $type = $this->config['fields'][$field]['type'];
-        switch ($type) {
-            case 'string':
-                $data = strval($data);
-                break;
-            case 'int':
-                $data = intval($data);
-                break;
-            case 'float':
-                $data = floatval($data);
-                break;
-            case 'bool':
-                $data = boolval($data);
-                break;
-            case 'timestamp':
-                $data = intval($data);
-                break;
-            case 'datetime':
-                $fmt = 'c';
-                $tz = new \DateTimeZone('UTC');
-                if (isset($this->config['fields'][$field]['format'])) {
-                    $fmt = $this->config['fields'][$field]['format'];
-                }
-                if (isset($this->config['fields'][$field]['timezone'])) {
-                    $tz = new \DateTimeZone($this->config['fields'][$field]['timezone']);
-                }
-                switch ($fmt) {
-                    case 'c':
-                        $data = date_create($data,$tz);
-                        break;
-                    default:
-                        $data = date_create_from_format($fmt,$data,$tz);
-                }
-                break;
-            default:
-                $data = strval($data);
+        if (isset(static::$getHandlers[$type]) && function_exists(static::$getHandlers[$type])) {
+            $handler = static::$getHandlers[$type];
+            $data = $handler($data, $this->config['fields'][$field]);
         }
         return $data;
     }
@@ -92,3 +65,51 @@ class CRUDderFormatter
         return $data;
     }
 }
+
+function formatter_string_get ($data, $fieldInfo)
+{
+    return strval($data);
+}
+function formatter_int_get ($data, $fieldInfo)
+{
+    return intval($data);
+}
+function formatter_float_get ($data, $fieldInfo)
+{
+    return floatval($data);
+}
+function formatter_bool_get ($data, $fieldInfo)
+{
+    return boolval($data);
+}
+function formatter_datetime_get ($data, $fieldInfo)
+{
+    $fmt = 'c';
+    $tz_db = new \DateTimeZone('UTC');
+    $tz_out = new \DateTimeZone('UTC');
+    if (isset($fieldInfo['format'])) {
+        $fmt = $fieldInfo['format'];
+    }
+    if (isset($fieldInfo['timezone_db'])) {
+        $tz_db = new \DateTimeZone($fieldInfo['timezone_db']);
+        $tz_out = new \DateTimeZone($fieldInfo['timezone_db']);
+    }
+    if (isset($fieldInfo['timezone'])) {
+        $tz_out = new \DateTimeZone($fieldInfo['timezone']);
+    }
+    switch ($fmt) {
+        case 'c':
+            $data = date_create($data,$tz_db);
+            break;
+        default:
+            $data = date_create_from_format($fmt,$data,$tz_db);
+    }
+    $data->setTimezone($tz_out);
+    return $data;
+}
+CRUDderFormatter::registerGetHandler('string','\glueExtras\CRUDder\formatter_string_get');
+CRUDderFormatter::registerGetHandler('int','\glueExtras\CRUDder\formatter_int_get');
+CRUDderFormatter::registerGetHandler('float','\glueExtras\CRUDder\formatter_float_get');
+CRUDderFormatter::registerGetHandler('bool','\glueExtras\CRUDder\formatter_bool_get');
+CRUDderFormatter::registerGetHandler('timestamp','\glueExtras\CRUDder\formatter_int_get');
+CRUDderFormatter::registerGetHandler('datetime','\glueExtras\CRUDder\formatter_datetime_get');

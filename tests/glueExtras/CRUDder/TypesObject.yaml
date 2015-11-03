@@ -28,3 +28,4 @@ fields:
     type: datetime
     format: F j, Y, g:i a
     timezone: America/Denver
+    timezone_db: America/Denver
