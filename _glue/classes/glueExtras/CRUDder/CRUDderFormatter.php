@@ -80,7 +80,10 @@ function formatter_float_get ($data, $fieldInfo)
 }
 function formatter_bool_get ($data, $fieldInfo)
 {
-    return boolval($data);
+    if (function_exists('boolval')) {
+        return boolval($data);
+    }
+    return settype($data, 'boolean');
 }
 function formatter_datetime_get ($data, $fieldInfo)
 {
