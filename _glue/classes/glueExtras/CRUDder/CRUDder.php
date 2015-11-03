@@ -60,15 +60,16 @@ abstract class CRUDder implements CRUDderI
         foreach ($class::$config['fields'] as $fieldName => $fieldInfo) {
             if ($fieldName != $class::$config['key']) {
                 $cols[] = $fieldInfo['col'];
-                $values[] = static::$formatter->quote($data[$fieldName]);
+                $values[$fieldName] = static::$formatter->set($fieldName, $data[$fieldName]);
+                $valueKeys[] = $fieldName;
             }
         }
         //build query as a string
-        $query = 'INSERT INTO ' . $class::$cTable . PHP_EOL;
+        $query = 'INSERT INTO ' . $class::$config['table'] . PHP_EOL;
         $query .= '       (' . implode(', ', $cols) . ')' . PHP_EOL;
-        $query .= 'VALUES (' . implode(', ', $values) . ')';
+        $query .= 'VALUES (:' . implode(', :', $valueKeys) . ')';
         $statement = static::$conn->prepare($query);
-        if (!$statement->execute()) {
+        if (!$statement->execute($values)) {
             return false;
         }
         $cKey = static::$conn->lastInsertId();
@@ -79,7 +80,7 @@ abstract class CRUDder implements CRUDderI
         $class = get_called_class();
         $defaults = array(
             'where'=>false,
-            'sort'=>$class::$cSort,
+            'sort'=>$class::$config['defaultSort'],
             'limit'=>0,
             'offset'=>0,
         );
@@ -92,7 +93,7 @@ abstract class CRUDder implements CRUDderI
             $cols[] = $fieldInfo['col'];
         }
         $query .= implode(', ', $cols) . PHP_EOL;
-        $query .= 'FROM ' . $class::$cTable . PHP_EOL;
+        $query .= 'FROM ' . $class::$config['table'] . PHP_EOL;
         //WHERE statement
         if ($options['where']) {
             $query .= 'WHERE' . PHP_EOL;
@@ -153,7 +154,7 @@ abstract class CRUDder implements CRUDderI
             $class::$config['key'] => $this->__get($class::$config['key'])
         );
         foreach (array_flip($this->dataChanged) as $fieldName) {
-            if ($fieldName != $class::$cKey) {
+            if ($fieldName != $class::$config['key']) {
                 $updates[] = '@@' . $fieldName . '@@ = :' . $fieldName;
                 $values[] = static::$formatter->set($fieldName, $this->data[$fieldName]);
             }
@@ -183,7 +184,7 @@ abstract class CRUDder implements CRUDderI
             $class::$config['key'] => $this->__get($class::$config['key'])
         );
         //build query
-        $query = 'DELETE FROM ' . $class::$cTable . PHP_EOL;
+        $query = 'DELETE FROM ' . $class::$config['table'] . PHP_EOL;
         $query .= 'WHERE @@' . $class::$config['key'] . '@@ = :' . $class::$config['key'] . PHP_EOL;
         //Fix column names
         $query = $class::queryColNameFormatter($query);

@@ -1,0 +1,31 @@
+table: TypesObject
+key: id
+defaultSort: @@id@@ DESC
+fields:
+  id:
+    col: to_id
+    type: int
+  string:
+    col: to_string
+    type: string
+  int:
+    col: to_int
+    type: int
+  float:
+    col: to_float
+    type: float
+  bool:
+    col: to_bool
+    type: bool
+  timestamp:
+    col: to_timestamp
+    type: timestamp
+  datetime:
+    col: to_datetime
+    type: datetime
+  datetime_cformat:
+    col: to_datetime_cformat
+    type: datetime
+    format: F j, Y, g:i a
+    timezone: America/Denver
+    timezone_db: America/Denver

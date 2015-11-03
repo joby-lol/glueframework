@@ -145,18 +145,6 @@ TestCRUDder::configureDB('sqlite::memory:', null, null);
 
 class BasicObject extends TestCRUDder
 {
-    protected static $cTable = 'BasicObject';
-    protected static $cKey = 'id';
-    protected static $cSort = '@@id@@ DESC';
-    protected static $cFields = array(
-        'id' => array(
-            'col' => 'bo_id',
-            'type' => 'int'
-        ),
-        'string' => array(
-            'col' => 'bo_string',
-            'type' => 'string'
-        )
-    );
+    protected static $config = array();
 }
 BasicObject::configureClass(file_get_contents(__DIR__ . '/BasicObject.yaml'));

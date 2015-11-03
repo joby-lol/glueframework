@@ -3,6 +3,7 @@
     <testsuite name="CRUDder">
       <file>tests/glueExtras/CRUDder/CRUDderTest.php</file>
       <file>tests/glueExtras/CRUDder/CRUDderTransactionsTest.php</file>
+      <file>tests/glueExtras/CRUDder/CRUDderTypesTest.php</file>
     </testsuite>
   </testsuites>
 </phpunit>
