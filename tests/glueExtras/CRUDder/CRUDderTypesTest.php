@@ -28,16 +28,16 @@ $createCorrect = array(
     'int' => 5,
     'float' => 1.75,
     'bool' => true,
-    'datetime_timestamp' => 1446530471,
-    'datetime_string' => new \DateTime('2015-11-03T07:01:11+01:00')
+    'timestamp' => 1446530471,
+    'datetime' => new \DateTime('2015-11-03T07:01:11+01:00')
 );
 $createCoerced = array(
     'string' => 5.8975,
     'int' => '5',
     'float' => '1.75',
     'bool' => 1,
-    'datetime_timestamp' => '1446530471',
-    'datetime_string' => '2015-11-03T07:01:11+01:00'
+    'timestamp' => '1446530471',
+    'datetime' => '2015-11-03T07:01:11+01:00'
 );
 
 class CRUDderTypesTest extends \PHPUnit_Extensions_Database_TestCase
@@ -53,18 +53,22 @@ class CRUDderTypesTest extends \PHPUnit_Extensions_Database_TestCase
         $this->assertNotFalse($correct);
         $this->assertNotFalse($coerced);
         //Check types
-        $this->assertInternalType('string',$correct->string);
-        $this->assertInternalType('string',$coerced->string);
-        $this->assertInternalType('int',$correct->int);
-        $this->assertInternalType('int',$coerced->int);
-        $this->assertInternalType('float',$correct->float);
-        $this->assertInternalType('float',$coerced->float);
-        $this->assertInternalType('bool',$correct->bool);
-        $this->assertInternalType('bool',$coerced->bool);
-        $this->assertInternalType('int',$correct->timestamp);
-        $this->assertInternalType('int',$coerced->timestamp);
-        $this->assertInstanceOf('DateTime',$correct->datetime);
-        $this->assertInstanceOf('DateTime',$coerced->datetime);
+        $this->assertInternalType('string', $correct->string);
+        $this->assertInternalType('string', $coerced->string);
+        $this->assertInternalType('int', $correct->int);
+        $this->assertInternalType('int', $coerced->int);
+        $this->assertInternalType('float', $correct->float);
+        $this->assertInternalType('float', $coerced->float);
+        $this->assertInternalType('bool', $correct->bool);
+        $this->assertInternalType('bool', $coerced->bool);
+        $this->assertInternalType('int', $correct->timestamp);
+        $this->assertInternalType('int', $coerced->timestamp);
+        $this->assertInstanceOf('DateTime', $correct->datetime);
+        $this->assertInstanceOf('DateTime', $coerced->datetime);
+        //Check equality
+        $this->assertEquals($createCorrect['string'], $correct->string);
+        $this->assertEquals($createCorrect['int'], $correct->int);
+        $this->assertEquals($createCorrect['float'], $correct->float);
     }
 
     /**
@@ -98,20 +102,7 @@ class CRUDderTypesTest extends \PHPUnit_Extensions_Database_TestCase
 Class TestCRUDder extends CRUDder {}
 TestCRUDder::configureDB('sqlite::memory:', null, null);
 
-class TypesObject extends TestCRUDder
-{
-    protected static $cTable = 'BasicObject';
-    protected static $cKey = 'id';
-    protected static $cSort = '@@id@@ DESC';
-    protected static $cFields = array(
-        'id' => array(
-            'col' => 'bo_id',
-            'type' => 'int'
-        ),
-        'string' => array(
-            'col' => 'bo_string',
-            'type' => 'string'
-        )
-    );
+class TypesObject extends TestCRUDder {
+    protected static $config = array();
 }
-TypesObject::configureClass(file_get_contents(__DIR__ . '/BasicObject.yaml'));
+TypesObject::configureClass(file_get_contents(__DIR__ . '/TypesObject.yaml'));

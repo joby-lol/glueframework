@@ -37,10 +37,18 @@ class CRUDderFormatter
     public function set($field, $data)
     {
         //TODO: implement this
+
+        $data = $this->forceToString($field, $data);
         return $data;
     }
-    public function quote($data)
+    protected function forceToString($field, $data)
     {
-        return $this->conn->quote($data);
+        if ($data instanceof \DateTime) {
+            if ($this->config['fields'][$field]['dbFormatString']) {
+                return $data->format($this->config['fields'][$field]['dbFormatString']);
+            }
+            return $data->format('c');
+        }
+        return $data;
     }
 }

@@ -33,7 +33,7 @@ class Transacter
     public function beginTransaction()
     {
         static::$transactions[] = $this->transactionID;
-        return static::$conn->exec('SAVEPOINT trans' . count(static::$transactions)) >= 1;
+        return static::$conn->exec('SAVEPOINT trans' . count(static::$transactions)) !== false;
     }
     public function rollback()
     {
@@ -41,7 +41,7 @@ class Transacter
             return false;
         }
         array_pop(static::$transactions);
-        return static::$conn->exec('ROLLBACK TO trans' . (count(static::$transactions)+1)) >= 1;
+        return static::$conn->exec('ROLLBACK TO trans' . (count(static::$transactions)+1)) !== false;
     }
     public function commit()
     {

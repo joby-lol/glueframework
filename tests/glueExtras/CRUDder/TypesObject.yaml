@@ -23,5 +23,4 @@ fields:
   datetime:
     col: to_datetime_string
     type: datetime
-    dbFormat: string
     dbFormatString: c #ISO 8601
