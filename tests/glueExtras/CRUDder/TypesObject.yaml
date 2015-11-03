@@ -17,12 +17,11 @@ fields:
   bool:
     col: to_bool
     type: bool
-  datetime_timestamp:
-    col: to_datetime_timestamp
-    type: datetime
-    datetime: timestamp
-  datetime_string:
+  timestamp:
+    col: to_timestamp
+    type: timestamp
+  datetime:
     col: to_datetime_string
     type: datetime
-    datetime: string
-    datetimeStringFormat: c #ISO 8601
+    dbFormat: string
+    dbFormatString: c #ISO 8601

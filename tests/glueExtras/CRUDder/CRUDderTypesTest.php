@@ -23,23 +23,48 @@ use \glueExtras\CRUDder\CRUDder;
 use \glueExtras\CRUDder\CRUDderFormatter;
 use \glueExtras\CRUDder\DB;
 
+$createCorrect = array(
+    'string' => 'String',
+    'int' => 5,
+    'float' => 1.75,
+    'bool' => true,
+    'datetime_timestamp' => 1446530471,
+    'datetime_string' => new \DateTime('2015-11-03T07:01:11+01:00')
+);
+$createCoerced = array(
+    'string' => 5.8975,
+    'int' => '5',
+    'float' => '1.75',
+    'bool' => 1,
+    'datetime_timestamp' => '1446530471',
+    'datetime_string' => '2015-11-03T07:01:11+01:00'
+);
+
 class CRUDderTypesTest extends \PHPUnit_Extensions_Database_TestCase
 {
     public static $conn = null;
-    // protected static $createArray1 = array(
-    //     'string' => 'Created Object 1'
-    // );
-    // protected static $createArray2 = array(
-    //     'string' => 'Created Object 2'
-    // );
 
-    public function testStrings()
+    public function testTypeBasics()
     {
-
-    }
-    public function testNumerics()
-    {
-
+        global $createCorrect, $createCoerced;
+        $correct = TypesObject::create($createCorrect);
+        $coerced = TypesObject::create($createCoerced);
+        //Both should successfully create an object
+        $this->assertNotFalse($correct);
+        $this->assertNotFalse($coerced);
+        //Check types
+        $this->assertInternalType('string',$correct->string);
+        $this->assertInternalType('string',$coerced->string);
+        $this->assertInternalType('int',$correct->int);
+        $this->assertInternalType('int',$coerced->int);
+        $this->assertInternalType('float',$correct->float);
+        $this->assertInternalType('float',$coerced->float);
+        $this->assertInternalType('bool',$correct->bool);
+        $this->assertInternalType('bool',$coerced->bool);
+        $this->assertInternalType('int',$correct->timestamp);
+        $this->assertInternalType('int',$coerced->timestamp);
+        $this->assertInstanceOf('DateTime',$correct->datetime);
+        $this->assertInstanceOf('DateTime',$coerced->datetime);
     }
 
     /**
@@ -55,7 +80,7 @@ class CRUDderTypesTest extends \PHPUnit_Extensions_Database_TestCase
             to_int INTEGER NOT NULL,
             to_float REAL NOT NULL,
             to_bool INTEGER NOT NULL,
-            to_datetime_timestamp INTEGER NOT NULL,
+            to_timestamp INTEGER NOT NULL,
             to_datetime_string VARCHAR(30) NOT NULL
         )');
         static::$conn = &$pdo;
