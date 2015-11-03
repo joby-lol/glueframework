@@ -52,14 +52,14 @@ class CRUDderFormatter
     {
         if ($data instanceof \DateTime) {
             $fmt = 'c';
-            $tz = new \DateTimeZone('UTC');
+            $tzDB = new \DateTimeZone('UTC');
             if (isset($this->config['fields'][$field]['format'])) {
                 $fmt = $this->config['fields'][$field]['format'];
             }
-            if (isset($this->config['fields'][$field]['timezone'])) {
-                $tz = new \DateTimeZone($this->config['fields'][$field]['timezone']);
+            if (isset($this->config['fields'][$field]['timezone_db'])) {
+                $tzDB = new \DateTimeZone($this->config['fields'][$field]['timezone_db']);
             }
-            $data->setTimezone($tz);
+            $data->setTimezone($tzDB);
             return $data->format($fmt);
         }
         return $data;
@@ -85,26 +85,26 @@ function formatter_bool_get ($data, $fieldInfo)
 function formatter_datetime_get ($data, $fieldInfo)
 {
     $fmt = 'c';
-    $tz_db = new \DateTimeZone('UTC');
-    $tz_out = new \DateTimeZone('UTC');
+    $tzDB = new \DateTimeZone('UTC');
+    $tzOut = new \DateTimeZone('UTC');
     if (isset($fieldInfo['format'])) {
         $fmt = $fieldInfo['format'];
     }
     if (isset($fieldInfo['timezone_db'])) {
-        $tz_db = new \DateTimeZone($fieldInfo['timezone_db']);
-        $tz_out = new \DateTimeZone($fieldInfo['timezone_db']);
+        $tzDB = new \DateTimeZone($fieldInfo['timezone_db']);
+        $tzOut = new \DateTimeZone($fieldInfo['timezone_db']);
     }
     if (isset($fieldInfo['timezone'])) {
-        $tz_out = new \DateTimeZone($fieldInfo['timezone']);
+        $tzOut = new \DateTimeZone($fieldInfo['timezone']);
     }
     switch ($fmt) {
         case 'c':
-            $data = date_create($data,$tz_db);
+            $data = date_create($data,$tzDB);
             break;
         default:
-            $data = date_create_from_format($fmt,$data,$tz_db);
+            $data = date_create_from_format($fmt,$data,$tzDB);
     }
-    $data->setTimezone($tz_out);
+    $data->setTimezone($tzOut);
     return $data;
 }
 CRUDderFormatter::registerGetHandler('string','\glueExtras\CRUDder\formatter_string_get');
