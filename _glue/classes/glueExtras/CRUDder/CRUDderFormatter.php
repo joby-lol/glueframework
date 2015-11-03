@@ -31,23 +31,63 @@ class CRUDderFormatter
     }
     public function get($field, $data)
     {
-        //TODO: implement this
+        $type = $this->config['fields'][$field]['type'];
+        switch ($type) {
+            case 'string':
+                $data = strval($data);
+                break;
+            case 'int':
+                $data = intval($data);
+                break;
+            case 'float':
+                $data = floatval($data);
+                break;
+            case 'bool':
+                $data = boolval($data);
+                break;
+            case 'timestamp':
+                $data = intval($data);
+                break;
+            case 'datetime':
+                $fmt = 'c';
+                $tz = new \DateTimeZone('UTC');
+                if (isset($this->config['fields'][$field]['format'])) {
+                    $fmt = $this->config['fields'][$field]['format'];
+                }
+                if (isset($this->config['fields'][$field]['timezone'])) {
+                    $tz = new \DateTimeZone($this->config['fields'][$field]['timezone']);
+                }
+                switch ($fmt) {
+                    case 'c':
+                        $data = date_create($data,$tz);
+                        break;
+                    default:
+                        $data = date_create_from_format($fmt,$data,$tz);
+                }
+                break;
+            default:
+                $data = strval($data);
+        }
         return $data;
     }
     public function set($field, $data)
     {
-        //TODO: implement this
-
         $data = $this->forceToString($field, $data);
         return $data;
     }
     protected function forceToString($field, $data)
     {
         if ($data instanceof \DateTime) {
-            if ($this->config['fields'][$field]['dbFormatString']) {
-                return $data->format($this->config['fields'][$field]['dbFormatString']);
+            $fmt = 'c';
+            $tz = new \DateTimeZone('UTC');
+            if (isset($this->config['fields'][$field]['format'])) {
+                $fmt = $this->config['fields'][$field]['format'];
             }
-            return $data->format('c');
+            if (isset($this->config['fields'][$field]['timezone'])) {
+                $tz = new \DateTimeZone($this->config['fields'][$field]['timezone']);
+            }
+            $data->setTimezone($tz);
+            return $data->format($fmt);
         }
         return $data;
     }

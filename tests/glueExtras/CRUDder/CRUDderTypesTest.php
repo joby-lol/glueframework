@@ -29,7 +29,8 @@ $createCorrect = array(
     'float' => 1.75,
     'bool' => true,
     'timestamp' => 1446530471,
-    'datetime' => new \DateTime('2015-11-03T07:01:11+01:00')
+    'datetime' => new \DateTime('2015-11-03T07:15:30+00:00'),
+    'datetime_cformat' => new \DateTime('2015-11-03T07:15:00+00:00')
 );
 $createCoerced = array(
     'string' => 5.8975,
@@ -37,7 +38,8 @@ $createCoerced = array(
     'float' => '1.75',
     'bool' => 1,
     'timestamp' => '1446530471',
-    'datetime' => '2015-11-03T07:01:11+01:00'
+    'datetime' => '2015-11-03T07:01:11+00:00',
+    'datetime_cformat' => 'November 11, 2015, 7:15 am'
 );
 
 class CRUDderTypesTest extends \PHPUnit_Extensions_Database_TestCase
@@ -65,10 +67,24 @@ class CRUDderTypesTest extends \PHPUnit_Extensions_Database_TestCase
         $this->assertInternalType('int', $coerced->timestamp);
         $this->assertInstanceOf('DateTime', $correct->datetime);
         $this->assertInstanceOf('DateTime', $coerced->datetime);
-        //Check equality
+        $this->assertInstanceOf('DateTime', $correct->datetime_cformat);
+        $this->assertInstanceOf('DateTime', $coerced->datetime_cformat);
+        //Check equality on correct instance
         $this->assertEquals($createCorrect['string'], $correct->string);
         $this->assertEquals($createCorrect['int'], $correct->int);
         $this->assertEquals($createCorrect['float'], $correct->float);
+        $this->assertEquals($createCorrect['bool'], $correct->bool);
+        $this->assertEquals($createCorrect['timestamp'], $correct->timestamp);
+        $this->assertEquals($createCorrect['datetime'], $correct->datetime);
+        $this->assertEquals($createCorrect['datetime_cformat'], $correct->datetime_cformat);
+        //Check equality on coerced instance
+        $this->assertEquals($createCoerced['string'], $coerced->string);
+        $this->assertEquals($createCoerced['int'], $coerced->int);
+        $this->assertEquals($createCoerced['float'], $coerced->float);
+        $this->assertEquals($createCoerced['bool'], $coerced->bool);
+        $this->assertEquals($createCoerced['timestamp'], $coerced->timestamp);
+        $this->assertNotEquals($createCoerced['datetime'], $coerced->datetime);
+        $this->assertNotEquals($createCoerced['datetime_cformat'], $coerced->datetime_cformat);
     }
 
     /**
@@ -85,7 +101,8 @@ class CRUDderTypesTest extends \PHPUnit_Extensions_Database_TestCase
             to_float REAL NOT NULL,
             to_bool INTEGER NOT NULL,
             to_timestamp INTEGER NOT NULL,
-            to_datetime_string VARCHAR(30) NOT NULL
+            to_datetime VARCHAR(30) NOT NULL,
+            to_datetime_cformat VARCHAR(30) NOT NULL
         )');
         static::$conn = &$pdo;
         //return

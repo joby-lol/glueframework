@@ -21,6 +21,10 @@ fields:
     col: to_timestamp
     type: timestamp
   datetime:
-    col: to_datetime_string
+    col: to_datetime
     type: datetime
-    dbFormatString: c #ISO 8601
+  datetime_cformat:
+    col: to_datetime_cformat
+    type: datetime
+    format: F j, Y, g:i a
+    timezone: America/Denver
