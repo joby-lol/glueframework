@@ -1,0 +1,28 @@
+table: TypesObject
+key: id
+defaultSort: @@id@@ DESC
+fields:
+  id:
+    col: to_id
+    type: int
+  string:
+    col: to_string
+    type: string
+  int:
+    col: to_int
+    type: int
+  float:
+    col: to_float
+    type: float
+  bool:
+    col: to_bool
+    type: bool
+  datetime_timestamp:
+    col: to_datetime_timestamp
+    type: datetime
+    datetime: timestamp
+  datetime_string:
+    col: to_datetime_string
+    type: datetime
+    datetime: string
+    datetimeStringFormat: c #ISO 8601
