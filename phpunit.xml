@@ -4,6 +4,7 @@
       <file>tests/glueExtras/CRUDder/CRUDderTest.php</file>
       <file>tests/glueExtras/CRUDder/CRUDderTransactionsTest.php</file>
       <file>tests/glueExtras/CRUDder/CRUDderTypesTest.php</file>
+      <file>tests/glueExtras/CRUDder/CRUDderSubObjectsTest.php</file>
     </testsuite>
   </testsuites>
 </phpunit>
