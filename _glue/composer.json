@@ -13,6 +13,6 @@
       "symfony/yaml": "^2.7",
       "mnapoli/front-yaml": "^1.5",
       "nirix/nanite": "^1.0",
-      "mustache/mustache": "^2.9"
+      "twig/twig": "^1.23"
     }
 }
