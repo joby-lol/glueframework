@@ -4,6 +4,8 @@ A PHP framework for sticking the old to the new.
 [![Build Status](https://travis-ci.org/jobyone/glueframework.svg?branch=master)](https://travis-ci.org/jobyone/glueframework)
 [![Code Climate](https://codeclimate.com/github/jobyone/glueframework/badges/gpa.svg)](https://codeclimate.com/github/jobyone/glueframework)
 
+**NOTE:** You shouldn't use this thing, it isn't remotely stable. I'm kind of just getting my feet wet with github and writing a framework so I know some pitfalls and can better pick an established one.
+
 Glue is a lightweight PHP framework designed for those who aren't building a new site from scratch. More often than not you can't just throw away all the code you've got on a website. Maybe you don't have the manpower, maybe you don't have the time. Maybe you realize that if it works you should probably just let it continue to work until you're good and ready to replace it.
 
 Incremental improvements are the reason Glue exists. It's designed to offer a modern classloader, router, and templating system -- plus some management of configuration and credentials. All tied into tools for integrating it all together with various legacy anti-patterns.
