@@ -41,8 +41,7 @@ abstract class CRUDder implements CRUDderI
     }
     public static function configureDB($dsn, $username, $password)
     {
-        $class = get_called_class();
-     static::$conn = DB::getConnection($dsn, $username, $password);
+        static::$conn = DB::getConnection($dsn, $username, $password);
     }
     //Constructor -- protected so it can only be called by factories
     protected function __construct($input)
@@ -197,7 +196,6 @@ abstract class CRUDder implements CRUDderI
     //transactions
     public static function getTransacter()
     {
-        $class = get_called_class();
         return new Transacter(static::$conn);
     }
     //getting and setting
