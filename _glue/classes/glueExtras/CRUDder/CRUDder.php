@@ -49,7 +49,7 @@ abstract class CRUDder implements CRUDderI
     {
         $class = get_called_class();
         foreach ($class::$config['fields'] as $fieldID => $fieldInfo) {
-            $this->data[$fieldID] = $input[$fieldInfo['col']];
+            $this->data[$fieldID] = $class::$formatter->get($fieldID, $input[$fieldInfo['col']]);
         }
     }
     //CRUD methods
@@ -155,7 +155,7 @@ abstract class CRUDder implements CRUDderI
         $values = array(
             $class::$config['key'] => $this->__get($class::$config['key'])
         );
-        foreach (array_flip($this->dataChanged) as $fieldName) {
+        foreach (array_keys($this->dataChanged) as $fieldName) {
             if ($fieldName != $class::$config['key']) {
                 $updates[] = '@@' . $fieldName . '@@ = :' . $fieldName;
                 $values[] = $class::$formatter->set($fieldName, $this->data[$fieldName]);
@@ -203,11 +203,10 @@ abstract class CRUDder implements CRUDderI
     //getting and setting
     public function __get($key)
     {
-        if (!isset($this->data[$key])) {
+        if (!array_key_exists($key,$this->data)) {
             return false;
         }
-        $class = get_called_class();
-        return $class::$formatter->get($key, $this->data[$key]);
+        return $this->data[$key];
     }
     public function __set($key, $val)
     {

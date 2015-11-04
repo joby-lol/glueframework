@@ -110,7 +110,11 @@ function formatter_subObject_get ($data, $fieldInfo)
     if (!class_exists($objectType)) {
         throw new Exception("objectType \"$objectType\" isn't a class", 1);
     }
-    return $objectType::create($data);
+    $data = $objectType::read($data);
+    if ($data) {
+        return $data;
+    }
+    return null;
 }
 CRUDderFormatter::registerGetHandler('string','\glueExtras\CRUDder\formatter_string_get');
 CRUDderFormatter::registerGetHandler('int','\glueExtras\CRUDder\formatter_int_get');
@@ -142,7 +146,11 @@ function formatter_subObject_set ($data, $fieldInfo)
         return null;
     }
     $keyField = $fieldInfo['keyField'];
-    return $data->__get($keyField);
+    $data = $data->__get($keyField);
+    if ($data) {
+        return $data;
+    }
+    return null;
 }
 CRUDderFormatter::registerSetHandler('datetime','\glueExtras\CRUDder\formatter_datetime_set');
 CRUDderFormatter::registerSetHandler('subObject','\glueExtras\CRUDder\formatter_subObject_set');
