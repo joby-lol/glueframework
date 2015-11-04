@@ -15,12 +15,10 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 Template:
-  defaultTemplate: default
+  defaultTemplate: default.twig
   fields:
     siteTitle: Glue Framework Website
     pageTitle: Untitled Page
     pageBody: No content specified
   dirs:
     system: "@@GLUE_PATH@@/templates"
-  extensions:
-    - mustache

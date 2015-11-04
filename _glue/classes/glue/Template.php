@@ -19,13 +19,17 @@
  */
 namespace glue;
 
+use \Twig_Loader_Filesystem;
+use \Twig_Environment;
+
 class Template
 {
-    public static $template = 'default';
+    private static $template = 'default.twig';
     public static $rawOutputActive = false;
     public static $rawOutputContent = '';
     private static $fields = array();
-    private static $fallbackTemplate = '{{{pageBody}}}\n<!-- Something is very wrong. -->';
+    private static $twigLoader = false;
+    private static $twigEnv = false;
 
     public static function set($key,$value)
     {
@@ -44,25 +48,13 @@ class Template
         static::$rawOutputContent = $out;
         static::$rawOutputActive = true;
     }
-    public static function setBody($value)
-    {
-        static::set('pageBody',$value);
-    }
     public static function setTemplate($template)
     {
         static::$template = $template;
     }
     public static function getTemplate()
     {
-        foreach (array_reverse(Conf::get('Template/dirs')) as $path) {
-            foreach (array_reverse(Conf::get('Template/extensions')) as $extension) {
-                $filename = $path . '/' . static::$template . '.' . $extension;
-                if (file_exists($filename)) {
-                    return file_get_contents($filename);
-                }
-            }
-        }
-        return static::$fallbackTemplate;
+        return static::$template;
     }
     public static function getFields()
     {
@@ -71,12 +63,20 @@ class Template
             static::$fields
         );
     }
-    public static function setFallbackTemplate ($template)
-    {
-        if ($template) {
-            static::$fallbackTemplate = $template;
+    public static function render($tName = false, $values = false) {
+        if (!$tName) {
+            $tName = static::getTemplate();
         }
+        if (!$values) {
+            $values = static::getFields();
+        }
+        if (!static::$twigLoader) {
+            static::$twigLoader = new Twig_Loader_Filesystem(array_reverse(Conf::get('Template/dirs')));
+        }
+        if (!static::$twigEnv) {
+            static::$twigEnv = new Twig_Environment(static::$twigLoader, array());
+        }
+        $template = static::$twigEnv->loadTemplate(Template::getTemplate());
+        echo $template->render(Template::getFields());
     }
 }
-Template::setFallbackTemplate(file_get_contents(__DIR__ . '/Template-fallback.mustache'));
-Template::$template = Conf::get('Template/defaultTemplate');

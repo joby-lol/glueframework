@@ -19,8 +19,6 @@
  */
 namespace glue;
 
-use \Mustache_Engine;
-
 ob_start();
 define('PAGE_RENDER_START', microtime(TRUE));
 
@@ -29,6 +27,9 @@ require GLUE_PATH . '/autoload.php';
 glue_include_once_if_exists(GLUE_PATH . '/vendor/autoload.php');
 glue_include_once_if_exists(SITE_PATH . '/vendor/autoload.php');
 glue_autoload('\glue\Route');//must be explicitly loaded
+
+//load bare-minimum configuration
+Template::setTemplate(Conf::get('Template/defaultTemplate'));
 
 // Load site-specific glue.php, between setup and final template output
 require SITE_PATH . '/glue.php';
@@ -45,10 +46,6 @@ $body = ob_get_clean();
 if (Template::$rawOutputActive) {
     echo Template::$rawOutputContent;
 }else {
-    Template::setBody($body);
-    $m = new Mustache_Engine;
-    echo $m->render(
-      Template::getTemplate(),
-      Template::getFields()
-    );
+    Template::set('pageBody', $body);
+    Template::render();
 }
