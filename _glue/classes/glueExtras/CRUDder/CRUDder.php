@@ -37,11 +37,12 @@ abstract class CRUDder implements CRUDderI
         $newConfig = Yaml::parse($yaml);
         $class = get_called_class();
         $class::$config = array_replace_recursive($class::$config, $newConfig);
-        $class::$formatter = new CRUDderFormatter($class::$conn, $class::$config);
+        $class::$formatter = new CRUDderFormatter(static::$conn, $class::$config);
     }
     public static function configureDB($dsn, $username, $password)
     {
-        static::$conn = DB::getConnection($dsn, $username, $password);
+        $class = get_called_class();
+     static::$conn = DB::getConnection($dsn, $username, $password);
     }
     //Constructor -- protected so it can only be called by factories
     protected function __construct($input)
@@ -57,10 +58,11 @@ abstract class CRUDder implements CRUDderI
         $class = get_called_class();
         $cols = array();
         $values = array();
+        $valueKeys = array();
         foreach ($class::$config['fields'] as $fieldName => $fieldInfo) {
-            if ($fieldName != $class::$config['key']) {
+            if ($fieldName != $class::$config['key'] && isset($data[$fieldName])) {
                 $cols[] = $fieldInfo['col'];
-                $values[$fieldName] = static::$formatter->set($fieldName, $data[$fieldName]);
+                $values[$fieldName] = $class::$formatter->set($fieldName, $data[$fieldName]);
                 $valueKeys[] = $fieldName;
             }
         }
@@ -114,7 +116,7 @@ abstract class CRUDder implements CRUDderI
         //Fix column names
         $query = $class::queryColNameFormatter($query);
         //Retrieve result
-        $statement = $class::$conn->prepare($query);
+        $statement = static::$conn->prepare($query);
         if ($statement->execute($values) === false) {
             return false;
         }
@@ -156,7 +158,7 @@ abstract class CRUDder implements CRUDderI
         foreach (array_flip($this->dataChanged) as $fieldName) {
             if ($fieldName != $class::$config['key']) {
                 $updates[] = '@@' . $fieldName . '@@ = :' . $fieldName;
-                $values[] = static::$formatter->set($fieldName, $this->data[$fieldName]);
+                $values[] = $class::$formatter->set($fieldName, $this->data[$fieldName]);
             }
         }
         //build query as a string
@@ -167,7 +169,7 @@ abstract class CRUDder implements CRUDderI
         //Fix column names
         $query = $class::queryColNameFormatter($query);
         //Execute query
-        $statement = $class::$conn->prepare($query);
+        $statement = static::$conn->prepare($query);
         $result = $statement->execute($values);
         if ($result) {
             $this->dataChanged = array();
@@ -189,14 +191,14 @@ abstract class CRUDder implements CRUDderI
         //Fix column names
         $query = $class::queryColNameFormatter($query);
         //Execute query
-        $statement = $class::$conn->prepare($query);
+        $statement = static::$conn->prepare($query);
         $statement->execute($values);
     }
     //transactions
     public static function getTransacter()
     {
         $class = get_called_class();
-        return new Transacter($class::$conn);
+        return new Transacter(static::$conn);
     }
     //getting and setting
     public function __get($key)
@@ -204,17 +206,20 @@ abstract class CRUDder implements CRUDderI
         if (!isset($this->data[$key])) {
             return false;
         }
-        return static::$formatter->get($key, $this->data[$key]);
+        $class = get_called_class();
+        return $class::$formatter->get($key, $this->data[$key]);
     }
     public function __set($key, $val)
     {
-        $this->data[$key] = static::$formatter->set($key, $val);
+        $class = get_called_class();
+        $this->data[$key] = $class::$formatter->set($key, $val);
         $this->dataChanged[$key] = $val;
     }
     //internal utility functions
     public static function getConfig()
     {
-        return static::$config;
+        $class = get_called_class();
+        return $class::$config;
     }
     protected static function queryColNameFormatter($string)
     {

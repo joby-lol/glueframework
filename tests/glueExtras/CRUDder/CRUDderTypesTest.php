@@ -20,7 +20,6 @@
 namespace glue\CRUDder\TypesTest;
 
 use \glueExtras\CRUDder\CRUDder;
-use \glueExtras\CRUDder\CRUDderFormatter;
 use \glueExtras\CRUDder\DB;
 
 $createCorrect = array(
@@ -92,7 +91,7 @@ class CRUDderTypesTest extends \PHPUnit_Extensions_Database_TestCase
     */
     public function getConnection() {
         $pdo = DB::getConnection('sqlite::memory:', null, null);
-        //basicObject schema
+        //TypesObject schema
         $pdo->exec('DROP TABLE IF EXISTS TypesObject');
         $pdo->exec('CREATE TABLE TypesObject (
             to_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,10 +115,13 @@ class CRUDderTypesTest extends \PHPUnit_Extensions_Database_TestCase
     }
 }
 
-Class TestCRUDder extends CRUDder {}
+Class TestCRUDder extends CRUDder {
+    protected static $conn;
+}
 TestCRUDder::configureDB('sqlite::memory:', null, null);
 
 class TypesObject extends TestCRUDder {
     protected static $config = array();
+    protected static $formatter;
 }
 TypesObject::configureClass(file_get_contents(__DIR__ . '/TypesObject.yaml'));

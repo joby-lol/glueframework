@@ -17,51 +17,31 @@
   * with this program; if not, write to the Free Software Foundation, Inc.,
   * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-namespace glue\CRUDder\TransactionsTest;
+namespace glueExtras\CRUDder\SubObjectsTest;
 
 use \glueExtras\CRUDder\CRUDder;
 use \glueExtras\CRUDder\DB;
 
-class CRUDderTransactionsTest extends \PHPUnit_Extensions_Database_TestCase
+class CRUDderSubObjectsTest extends \PHPUnit_Extensions_Database_TestCase
 {
     public static $conn = null;
-    protected static $createArray1 = array(
-        'string' => 'Created Object 1'
+    protected static $boArray1 = array(
+        'string' => 'Basic Object 1'
     );
-    protected static $createArray2 = array(
-        'string' => 'Created Object 2'
+    protected static $boArray2 = array(
+        'string' => 'Basic Object 2'
     );
 
-    public function testTransactions()
+    public function testSubObjects()
     {
-        //Test the basics -- do commit() and rollback() work?
-        $t = BasicObject::getTransacter();
-        $this->assertTrue($t->beginTransaction());
-        //add an object and rollback
-        $f1 = BasicObject::create(static::$createArray1);
-        $this->assertTrue($t->rollback());
-        $this->assertTrue($t->beginTransaction());
-        //there should be no ID 1
-        $this->assertFalse(BasicObject::read(1),'rollback() didn\'t prevent changes from saving');
-        //add an object and commit
-        $f1 = BasicObject::create(static::$createArray1);
-        $this->assertTrue($t->commit());//no way to test commit, so we just make sure it doesn't blow up
-    }
-    public function testTransactionResolutionOrder()
-    {
-        //Test that transactions enforce proper commit/rollback order
-        $top = BasicObject::getTransacter();
-        $middle = BasicObject::getTransacter();
-        $bottom = BasicObject::getTransacter();
-        $this->assertTrue($top->beginTransaction());
-            $this->assertTrue($middle->beginTransaction());
-                $this->assertFalse($top->rollback());
-                $this->assertTrue($bottom->beginTransaction());
-                    $this->assertFalse($top->rollback());
-                    $this->assertFalse($middle->rollback());
-                $this->assertTrue($bottom->rollback());
-            $this->assertTrue($middle->rollback());
-        $this->assertTrue($top->rollback());
+        $bo1 = BasicObject::create(static::$boArray1);
+        $bo2 = BasicObject::create(static::$boArray2);
+        $ma1 = MasterObject::create(array(
+            'string'=>'Some string',
+            'child1'=>$bo1,
+            'child2'=>$bo2
+        ));
+
     }
 
     /**
@@ -69,11 +49,21 @@ class CRUDderTransactionsTest extends \PHPUnit_Extensions_Database_TestCase
     */
     public function getConnection() {
         $pdo = DB::getConnection('sqlite::memory:', null, null);
-        //basicObject schema
+        //BasicObject schema
         $pdo->exec('DROP TABLE IF EXISTS BasicObject');
         $pdo->exec('CREATE TABLE BasicObject (
             bo_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            bo_string VARCHAR(30) NOT NULL)');
+            bo_string VARCHAR(30) NOT NULL
+        )');
+        static::$conn = &$pdo;
+        //MasterObject schema
+        $pdo->exec('DROP TABLE IF EXISTS MasterObject');
+        $pdo->exec('CREATE TABLE MasterObject (
+            mo_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            mo_childA INTEGER,
+            mo_childB INTEGER,
+            mo_string VARCHAR(30)
+        )');
         static::$conn = &$pdo;
         //return
         return $this->createDefaultDBConnection(static::$conn);
@@ -90,6 +80,13 @@ Class TestCRUDder extends CRUDder {
     protected static $conn;
 }
 TestCRUDder::configureDB('sqlite::memory:', null, null);
+
+class MasterObject extends TestCRUDder
+{
+    protected static $config = array();
+    protected static $formatter;
+}
+MasterObject::configureClass(file_get_contents(__DIR__ . '/MasterObject.yaml'));
 
 class BasicObject extends TestCRUDder
 {

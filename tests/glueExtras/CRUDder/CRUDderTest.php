@@ -20,7 +20,6 @@
 namespace glueExtras\CRUDder\CoreTest;
 
 use \glueExtras\CRUDder\CRUDder;
-use \glueExtras\CRUDder\CRUDderFormatter;
 use \glueExtras\CRUDder\DB;
 
 class CRUDderTest extends \PHPUnit_Extensions_Database_TestCase
@@ -146,5 +145,6 @@ TestCRUDder::configureDB('sqlite::memory:', null, null);
 class BasicObject extends TestCRUDder
 {
     protected static $config = array();
+    protected static $formatter;
 }
 BasicObject::configureClass(file_get_contents(__DIR__ . '/BasicObject.yaml'));

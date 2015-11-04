@@ -1,0 +1,20 @@
+table: MasterObject
+key: id
+defaultSort: @@id@@ DESC
+fields:
+  id:
+    col: mo_id
+    type: int
+  child1:
+    col: mo_childA
+    type: subObject
+    objectType: glueExtras\CRUDder\SubObjectsTest\BasicObject
+    keyField: id
+  child2:
+    col: mo_childB
+    type: subObject
+    objectType: glueExtras\CRUDder\SubObjectsTest\BasicObject
+    keyField: id
+  string:
+    col: mo_string
+    type: string
