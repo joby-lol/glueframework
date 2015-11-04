@@ -32,7 +32,7 @@ class CRUDderSubObjectsTest extends \PHPUnit_Extensions_Database_TestCase
         'string' => 'Basic Object 2'
     );
 
-    public function testSubObjects()
+    public function testCreateSubObjects()
     {
         $bo1 = BasicObject::create(static::$boArray1);
         $bo2 = BasicObject::create(static::$boArray2);
@@ -41,7 +41,51 @@ class CRUDderSubObjectsTest extends \PHPUnit_Extensions_Database_TestCase
             'child1'=>$bo1,
             'child2'=>$bo2
         ));
+        $this->assertEquals($bo1->string,$ma1->child1->string);
+        $this->assertEquals($bo2->string,$ma1->child2->string);
+        //test creation with null and nonexistent subobjects
+        $ma2 = MasterObject::create(array(
+            'string'=>'Some other string',
+            'child1'=>null
+        ));
+        $this->assertNull($ma2->child1);
+        $this->assertNull($ma2->child2);
+    }
 
+    public function testRemoveSubObjects()
+    {
+        $bo1 = BasicObject::create(static::$boArray1);
+        $bo2 = BasicObject::create(static::$boArray2);
+        $ma1 = MasterObject::create(array(
+            'string'=>'Some string',
+            'child1'=>$bo1,
+            'child2'=>$bo2
+        ));
+        //remove first child
+        $ma1->child1 = null;
+        $ma1->update();
+        $ma1 = MasterObject::read(1);
+        $this->assertNull($ma1->child1);
+        //remove second child
+        $ma1->child2 = null;
+        $ma1->update();
+        $ma1 = MasterObject::read(1);
+        $this->assertNull($ma1->child2);
+    }
+
+    public function testUpdateSubObjects()
+    {
+        $bo1 = BasicObject::create(static::$boArray1);
+        $ma1 = MasterObject::create(array(
+            'string'=>'Some other string',
+            'child1'=>$bo1
+        ));
+        $bo1 = $ma1->child1;
+        $bo1->string = 'Updated basic object';
+        $bo1->update();
+        //check that it was updated
+        $bo1 = BasicObject::read(1);
+        $this->assertEquals('Updated basic object', $bo1->string);
     }
 
     /**
